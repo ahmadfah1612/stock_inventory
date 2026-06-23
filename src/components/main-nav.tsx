@@ -29,6 +29,12 @@ export function MainNav() {
           </Link>
         );
       })}
+      <a
+        href="/export"
+        className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+      >
+        Export
+      </a>
     </nav>
   );
 }
