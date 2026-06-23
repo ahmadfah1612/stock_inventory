@@ -1,22 +1,42 @@
 import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { materials } from "@/db/schema";
+import { materials, transactions } from "@/db/schema";
 import { listLedger } from "@/server/transactions";
 import { LedgerTable } from "@/components/ledger-table";
+import { PageHeader, PrimaryLink } from "@/components/ui";
+import type { InferSelectModel } from "drizzle-orm";
 
 export default async function LedgerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [mat] = await db.select().from(materials).where(eq(materials.id, id));
-  if (!mat) return <div>Material not found.</div>;
-  const rows = await listLedger(id);
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">{mat.brand} {mat.grade}</h1>
-        <Link href={`/materials/${id}/new`} className="rounded bg-black px-3 py-1.5 text-sm text-white">+ Transaksi</Link>
+  if (!mat) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+        <p className="text-sm font-medium text-slate-900">Material not found</p>
+        <Link href="/materials" className="mt-3 inline-flex text-sm font-medium text-indigo-700 hover:underline">
+          Back to Materials
+        </Link>
       </div>
-      <LedgerTable rows={rows as any} />
+    );
+  }
+  const rows: InferSelectModel<typeof transactions>[] = await listLedger(id);
+  return (
+    <div>
+      <div className="mb-4">
+        <Link
+          href="/materials"
+          className="text-sm font-medium text-slate-500 hover:text-slate-700"
+        >
+          ← Materials
+        </Link>
+      </div>
+      <PageHeader
+        title={`${mat.brand} ${mat.grade}`}
+        subtitle="Stock card · running weighted-average cost"
+        action={<PrimaryLink href={`/materials/${id}/new`}>+ Transaksi</PrimaryLink>}
+      />
+      <LedgerTable rows={rows} />
     </div>
   );
 }

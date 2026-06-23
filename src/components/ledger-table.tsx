@@ -1,4 +1,5 @@
 import { formatDate, formatIDR, formatQty } from "@/lib/money";
+import { TypeBadge } from "@/components/ui";
 
 type Row = {
   id: string; date: string; type: string; docNo: string | null; counterparty: string | null;
@@ -6,50 +7,80 @@ type Row = {
   cogs: string; revenue: string; profit: string; balQty: string; balValue: string;
 };
 
+const th = "px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500";
+const sub = "px-3 py-2 text-right text-xs font-semibold text-slate-500";
+const td = "whitespace-nowrap px-3 py-2.5 text-right tabular text-slate-700";
+
 export function LedgerTable({ rows }: { rows: Row[] }) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+        <p className="text-sm font-medium text-slate-900">No transactions yet</p>
+        <p className="mt-1 text-sm text-slate-500">Record a buy to open this stock card.</p>
+      </div>
+    );
+  }
+
   return (
-    <table className="w-full border-collapse text-xs">
-      <thead>
-        <tr className="bg-gray-100 text-left">
-          <th className="border p-1" rowSpan={2}>Tanggal</th>
-          <th className="border p-1" rowSpan={2}>No SJ/Invoice</th>
-          <th className="border p-1" rowSpan={2}>Tipe</th>
-          <th className="border p-1" rowSpan={2}>Customer</th>
-          <th className="border p-1 text-center" colSpan={3}>Pembelian</th>
-          <th className="border p-1 text-center" colSpan={3}>Penjualan</th>
-          <th className="border p-1 text-center" colSpan={3}>Saldo</th>
-          <th className="border p-1" rowSpan={2}>Profit</th>
-        </tr>
-        <tr className="bg-gray-50">
-          {["Unit","Harga","Jumlah","Unit","Harga","Jumlah","Unit","Harga","Jumlah"].map((h, i) => (
-            <th key={i} className="border p-1 text-right">{h}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r) => {
-          const isBuy = r.type === "buy";
-          const avg = Number(r.balQty) === 0 ? "0" : String(Number(r.balValue) / Number(r.balQty));
-          return (
-            <tr key={r.id} className="border-b">
-              <td className="border p-1">{formatDate(r.date)}</td>
-              <td className="border p-1">{r.docNo ?? "-"}</td>
-              <td className="border p-1 capitalize">{r.type}</td>
-              <td className="border p-1">{r.counterparty ?? "-"}</td>
-              <td className="border p-1 text-right">{isBuy ? formatQty(r.qty) : ""}</td>
-              <td className="border p-1 text-right">{isBuy ? formatIDR(r.unitCost ?? 0) : ""}</td>
-              <td className="border p-1 text-right">{isBuy ? formatIDR(Number(r.qty) * Number(r.unitCost ?? 0)) : ""}</td>
-              <td className="border p-1 text-right">{!isBuy ? formatQty(r.qty) : ""}</td>
-              <td className="border p-1 text-right">{!isBuy ? formatIDR(r.salePrice ?? r.cogs) : ""}</td>
-              <td className="border p-1 text-right">{!isBuy ? formatIDR(r.revenue !== "0" ? r.revenue : r.cogs) : ""}</td>
-              <td className="border p-1 text-right">{formatQty(r.balQty)}</td>
-              <td className="border p-1 text-right">{formatIDR(avg)}</td>
-              <td className="border p-1 text-right">{formatIDR(r.balValue)}</td>
-              <td className="border p-1 text-right">{!isBuy && r.revenue !== "0" ? formatIDR(r.profit) : "-"}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <table className="w-full min-w-[920px] text-sm">
+        <thead>
+          <tr className="border-b border-slate-200 bg-slate-50 text-left">
+            <th scope="col" className={th} rowSpan={2}>Tanggal</th>
+            <th scope="col" className={th} rowSpan={2}>No SJ/Invoice</th>
+            <th scope="col" className={th} rowSpan={2}>Tipe</th>
+            <th scope="col" className={th} rowSpan={2}>Customer</th>
+            <th scope="colgroup" className="border-l border-slate-200 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-emerald-700" colSpan={3}>Pembelian</th>
+            <th scope="colgroup" className="border-l border-slate-200 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-indigo-700" colSpan={3}>Penjualan</th>
+            <th scope="colgroup" className="border-l border-slate-200 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-600" colSpan={3}>Saldo</th>
+            <th scope="col" className="border-l border-slate-200 px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide text-slate-500" rowSpan={2}>Profit</th>
+          </tr>
+          <tr className="border-b border-slate-200 bg-slate-50">
+            {["Unit", "Harga", "Jumlah", "Unit", "Harga", "Jumlah", "Unit", "Harga", "Jumlah"].map(
+              (h, i) => (
+                <th
+                  key={i}
+                  scope="col"
+                  className={`${sub} ${i % 3 === 0 ? "border-l border-slate-200" : ""}`}
+                >
+                  {h}
+                </th>
+              ),
+            )}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {rows.map((r) => {
+            const isBuy = r.type === "buy";
+            const avg = Number(r.balQty) === 0 ? "0" : String(Number(r.balValue) / Number(r.balQty));
+            const hasProfit = !isBuy && r.revenue !== "0";
+            return (
+              <tr key={r.id} className="transition-colors hover:bg-slate-50">
+                <td className="whitespace-nowrap px-3 py-2.5 text-slate-700">{formatDate(r.date)}</td>
+                <td className="whitespace-nowrap px-3 py-2.5 text-slate-500">{r.docNo ?? "—"}</td>
+                <td className="px-3 py-2.5"><TypeBadge type={r.type} /></td>
+                <td className="px-3 py-2.5 text-slate-700">{r.counterparty ?? "—"}</td>
+
+                <td className={`${td} border-l border-slate-100`}>{isBuy ? formatQty(r.qty) : ""}</td>
+                <td className={td}>{isBuy ? formatIDR(r.unitCost ?? 0) : ""}</td>
+                <td className={`${td} text-slate-900`}>{isBuy ? formatIDR(Number(r.qty) * Number(r.unitCost ?? 0)) : ""}</td>
+
+                <td className={`${td} border-l border-slate-100`}>{!isBuy ? formatQty(r.qty) : ""}</td>
+                <td className={td}>{!isBuy ? formatIDR(r.salePrice ?? r.cogs) : ""}</td>
+                <td className={`${td} text-slate-900`}>{!isBuy ? formatIDR(r.revenue !== "0" ? r.revenue : r.cogs) : ""}</td>
+
+                <td className={`${td} border-l border-slate-100`}>{formatQty(r.balQty)}</td>
+                <td className={td}>{formatIDR(avg)}</td>
+                <td className={`${td} font-medium text-slate-900`}>{formatIDR(r.balValue)}</td>
+
+                <td className={`${td} border-l border-slate-100 font-medium ${hasProfit ? (Number(r.profit) >= 0 ? "text-emerald-700" : "text-rose-700") : "text-slate-400"}`}>
+                  {hasProfit ? formatIDR(r.profit) : "—"}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
