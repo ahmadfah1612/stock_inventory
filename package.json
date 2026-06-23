@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "seed": "tsx scripts/seed-user.ts"
+    "seed": "tsx --tsconfig tsconfig.json scripts/seed-user.ts"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
