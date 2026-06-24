@@ -41,7 +41,7 @@ export default async function SummaryPage({
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Total Inventory Value" value={formatIDR(totalValue)} />
-        <StatCard label="Grades" value={String(rows.length)} hint="active materials" />
+        <StatCard label="Barang" value={String(rows.length)} hint="active materials" />
         <StatCard label="Out of Stock" value={String(outOfStock)} hint="grades at zero" />
       </div>
 
