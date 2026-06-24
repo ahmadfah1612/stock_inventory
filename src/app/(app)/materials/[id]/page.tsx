@@ -9,6 +9,7 @@ import { PageHeader, PrimaryLink, StatCard } from "@/components/ui";
 import { formatIDR, formatQty } from "@/lib/money";
 import { AveragePanel, type Saldo } from "@/components/average-panel";
 import { DeleteBarangButton } from "@/components/delete-barang-button";
+import { EditBarangButton } from "@/components/edit-barang-button";
 import type { InferSelectModel } from "drizzle-orm";
 
 type Txn = InferSelectModel<typeof transactions>;
@@ -27,10 +28,10 @@ export default async function LedgerPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ from?: string; to?: string }>;
+  searchParams: Promise<{ from?: string; to?: string; ok?: string; error?: string }>;
 }) {
   const { id } = await params;
-  const { from, to } = await searchParams;
+  const { from, to, ok, error } = await searchParams;
   const [mat] = await db.select().from(materials).where(eq(materials.id, id));
   if (!mat) {
     return (
@@ -69,6 +70,24 @@ export default async function LedgerPage({
           </div>
         }
       />
+
+      {ok && (
+        <p role="status" className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-3 py-2 text-sm text-emerald-300">
+          {ok}
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          {error}
+        </p>
+      )}
+
+      {isAdmin && (
+        <div className="mb-6">
+          <EditBarangButton id={id} brand={mat.brand} grade={mat.grade} />
+        </div>
+      )}
+
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Stok Tersedia"

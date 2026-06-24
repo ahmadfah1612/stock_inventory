@@ -30,6 +30,13 @@ export async function createMaterial(input: { brand: string; grade: string }) {
   await db.insert(materials).values({ brand: input.brand.trim(), grade: input.grade.trim() });
 }
 
+export async function updateMaterial(id: string, input: { brand: string; grade: string }) {
+  await db
+    .update(materials)
+    .set({ brand: input.brand.trim(), grade: input.grade.trim() })
+    .where(eq(materials.id, id));
+}
+
 /** Deletes a material and its transactions (FK cascade). */
 export async function deleteMaterial(id: string) {
   await db.delete(materials).where(eq(materials.id, id));

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { addTransaction } from "@/server/transactions";
-import { createMaterial, deleteMaterial } from "@/server/materials";
+import { createMaterial, deleteMaterial, updateMaterial } from "@/server/materials";
 import { importBarangFromExcel, ImportError } from "@/server/import-excel";
 import { createUser, deleteUser, changePassword } from "@/server/users";
 import { setSetting, LOW_STOCK_KEY } from "@/server/settings";
@@ -65,6 +65,26 @@ export async function createMaterialAction(formData: FormData) {
   }
   revalidatePath("/materials");
   redirect("/materials");
+}
+
+export async function updateMaterialAction(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const brand = String(formData.get("brand") ?? "").trim();
+  const grade = String(formData.get("grade") ?? "").trim();
+  if (!id) redirect("/materials");
+  const back = (m: string) => redirect(`/materials/${id}?error=${encodeURIComponent(m)}`);
+  if (!brand || !grade) back("Barang dan Kode Barang wajib diisi.");
+  try {
+    await updateMaterial(id, { brand, grade });
+  } catch (e) {
+    if ((e as { code?: string }).code === "23505") back(`${brand} ${grade} sudah ada.`);
+    throw e;
+  }
+  revalidatePath(`/materials/${id}`);
+  revalidatePath("/materials");
+  revalidatePath("/");
+  redirect(`/materials/${id}?ok=${encodeURIComponent("Barang diperbarui.")}`);
 }
 
 export async function deleteMaterialAction(formData: FormData) {
