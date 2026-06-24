@@ -2,7 +2,7 @@ import Link from "next/link";
 import { listMaterialsWithBalance } from "@/server/materials";
 import { MaterialForm } from "@/components/material-form";
 import { formatIDR, formatQty } from "@/lib/money";
-import { Card, PageHeader } from "@/components/ui";
+import { Card, PageHeader, StokKosongBadge } from "@/components/ui";
 
 export default async function MaterialsPage({
   searchParams,
@@ -43,10 +43,11 @@ export default async function MaterialsPage({
                     href={`/materials/${r.id}`}
                     className="flex items-center justify-between gap-4 px-4 py-3.5 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   >
-                    <span className="min-w-0">
-                      <span className="block truncate font-medium text-slate-900">
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="truncate font-medium text-slate-900">
                         {r.brand} <span className="text-slate-500">{r.grade}</span>
                       </span>
+                      {empty && <StokKosongBadge />}
                     </span>
                     <span className="flex shrink-0 items-center gap-3 text-sm tabular">
                       <span className={empty ? "text-slate-400" : "text-slate-700"}>

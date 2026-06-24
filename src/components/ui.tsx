@@ -67,6 +67,14 @@ export function TypeBadge({ type }: { type: string }) {
   );
 }
 
+export function StokKosongBadge() {
+  return (
+    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-400/20">
+      Stok Kosong
+    </span>
+  );
+}
+
 export function PrimaryLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link

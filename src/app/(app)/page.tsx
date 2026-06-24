@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { listMaterialsWithBalance } from "@/server/materials";
 import { formatIDR, formatQty } from "@/lib/money";
-import { Card, PageHeader, StatCard } from "@/components/ui";
+import { Card, PageHeader, StatCard, StokKosongBadge } from "@/components/ui";
 
 export default async function SummaryPage() {
   const rows = await listMaterialsWithBalance();
@@ -57,7 +57,12 @@ export default async function SummaryPage() {
                           {r.brand}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{r.grade}</td>
+                      <td className="px-4 py-3 text-slate-600">
+                        <span className="flex items-center gap-2">
+                          {r.grade}
+                          {empty && <StokKosongBadge />}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-right tabular text-slate-900">
                         {empty ? (
                           <span className="text-slate-400">0 Kg</span>
