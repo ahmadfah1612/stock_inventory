@@ -5,6 +5,9 @@ import { SearchBox } from "@/components/search-box";
 import { formatIDR, formatQty, formatDate } from "@/lib/money";
 import { compare, parseDir, arrow, type Dir } from "@/lib/sort";
 
+// Always read the live DB; never serve a cached (pre-seed) render.
+export const dynamic = "force-dynamic";
+
 type Tab = "customer" | "supplier";
 
 const CUST_COLS = {
