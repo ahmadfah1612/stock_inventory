@@ -26,7 +26,7 @@ export function AveragePanel({
         <div>
           <h2 className="text-sm font-semibold text-slate-900">Rata-rata (Saldo)</h2>
           <p className="mt-0.5 text-xs text-slate-500">
-            Saldo Unit / Harga / Jumlah pada akhir rentang tanggal. Harga = rata-rata tertimbang.
+            Saldo Unit / Harga / Jumlah pada akhir rentang tanggal.
           </p>
         </div>
         <form action={action} method="get" className="flex flex-wrap items-end gap-2">
