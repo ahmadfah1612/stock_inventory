@@ -8,6 +8,7 @@ const links = [
   { href: "/", label: "Summary" },
   { href: "/materials", label: "Materials" },
   { href: "/transaksi", label: "Transaksi" },
+  { href: "/report", label: "Report" },
   { href: "/import", label: "Import" },
   { href: "/export", label: "Export" },
 ];

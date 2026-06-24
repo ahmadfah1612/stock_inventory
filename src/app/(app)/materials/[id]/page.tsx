@@ -5,7 +5,8 @@ import { materials, transactions } from "@/db/schema";
 import { listLedger } from "@/server/transactions";
 import { auth } from "@/lib/auth";
 import { LedgerTable } from "@/components/ledger-table";
-import { PageHeader, PrimaryLink } from "@/components/ui";
+import { PageHeader, PrimaryLink, StatCard } from "@/components/ui";
+import { formatIDR, formatQty } from "@/lib/money";
 import { AveragePanel, type Saldo } from "@/components/average-panel";
 import { DeleteBarangButton } from "@/components/delete-barang-button";
 import type { InferSelectModel } from "drizzle-orm";
@@ -44,6 +45,10 @@ export default async function LedgerPage({
   const [rows, session] = await Promise.all([listLedger(id), auth()]);
   const isAdmin = session?.user?.role === "admin";
   const inRange = rows.filter((r) => (!from || r.date >= from) && (!to || r.date <= to));
+  const latest = rows.at(-1);
+  const latestQty = latest ? Number(latest.balQty) : 0;
+  const latestValue = latest ? Number(latest.balValue) : 0;
+  const latestHpp = latestQty > 0 ? latestValue / latestQty : 0;
   return (
     <div>
       <div className="mb-4">
@@ -64,6 +69,16 @@ export default async function LedgerPage({
           </div>
         }
       />
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard
+          label="Stok Tersedia"
+          value={formatQty(latestQty)}
+          hint={latest ? `per ${latest.date}` : "belum ada transaksi"}
+        />
+        <StatCard label="Total Nilai Barang" value={formatIDR(latestValue)} hint="qty × HPP" />
+        <StatCard label="HPP / Kg" value={formatIDR(latestHpp)} hint="rata-rata bergerak" />
+      </div>
+
       <AveragePanel
         action={`/materials/${id}`}
         from={from}

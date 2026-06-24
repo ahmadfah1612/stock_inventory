@@ -78,15 +78,19 @@ for name in wb.sheetnames:
             # some sheets mis-log buys in the Penjualan columns (type says Buy, values on sell side)
             qty = pemb_unit or penj_unit
             unit = numstr(row[5]) or numstr(row[8])
+            sale = None
         else:
             qty = penj_unit or pemb_unit
             unit = None
+            # sell carries a unit sale price in the Penjualan Harga column (J);
+            # sample/scrap leave the warehouse for free
+            sale = numstr(row[8]) if t == "sell" else None
         if qty is None or qty == "0":
             skipped += 1
             continue
         raw.append({
             "date": datestr(row[0]),  # may be None
-            "type": t, "qty": qty, "unitCost": unit, "salePrice": None,
+            "type": t, "qty": qty, "unitCost": unit, "salePrice": sale,
             "docNo": (str(row[1]).strip() if row[1] not in (None, "") else None),
             "counterparty": (str(row[3]).strip() if row[3] not in (None, "") else None),
         })
