@@ -23,5 +23,8 @@ COPY --from=build /app/scripts/migrate.mjs ./scripts/migrate.mjs
 # Full drizzle-orm package so the migrator submodule is available at runtime
 # (Next standalone only traces files the app imports, not the migrate script).
 COPY --from=deps /app/node_modules/drizzle-orm ./node_modules/drizzle-orm
+# bcryptjs for the admin bootstrap in migrate.mjs (Next bundles it into
+# server chunks, so it isn't left as a standalone node_modules package).
+COPY --from=deps /app/node_modules/bcryptjs ./node_modules/bcryptjs
 EXPOSE 3000
 CMD ["sh", "-c", "node scripts/migrate.mjs && node server.js"]
