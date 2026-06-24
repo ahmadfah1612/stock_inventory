@@ -19,7 +19,6 @@ export default async function ImportPage({
 
       <form
         action={importBarangAction}
-        encType="multipart/form-data"
         className="space-y-5 rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-sm"
       >
         {error && (
@@ -56,7 +55,7 @@ export default async function ImportPage({
             type="file"
             accept=".xlsx"
             required
-            className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500/150/20 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-300 hover:file:bg-indigo-500/150/200/30"
+            className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500/20 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-300 hover:file:bg-indigo-500/30"
           />
         </div>
 

@@ -19,11 +19,11 @@ export function ActivityChart({ data }: { data: MonthStat[] }) {
         </div>
         <div className="flex items-center gap-4 text-xs text-slate-300">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500/150" aria-hidden="true" />
+            <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500" aria-hidden="true" />
             Pembelian
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-indigo-500/150" aria-hidden="true" />
+            <span className="h-2.5 w-2.5 rounded-sm bg-indigo-500" aria-hidden="true" />
             Penjualan
           </span>
         </div>
@@ -39,12 +39,12 @@ export function ActivityChart({ data }: { data: MonthStat[] }) {
             <div key={m.ym} className="flex h-full flex-1 flex-col items-center">
               <div className="flex w-full flex-1 items-end justify-center gap-0.5 sm:gap-1">
                 <div
-                  className="w-2 rounded-t bg-emerald-500/150 transition-all sm:w-2.5"
+                  className="w-2 rounded-t bg-emerald-500 transition-all sm:w-2.5"
                   style={{ height: pct(m.buy) }}
                   title={`Pembelian ${monthLabel(m.ym)}: ${formatIDR(m.buy)}`}
                 />
                 <div
-                  className="w-2 rounded-t bg-indigo-500/150 transition-all sm:w-2.5"
+                  className="w-2 rounded-t bg-indigo-500 transition-all sm:w-2.5"
                   style={{ height: pct(m.sell) }}
                   title={`Penjualan ${monthLabel(m.ym)}: ${formatIDR(m.sell)}`}
                 />
