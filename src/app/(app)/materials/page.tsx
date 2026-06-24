@@ -3,6 +3,7 @@ import { listMaterialsWithBalance } from "@/server/materials";
 import { MaterialForm } from "@/components/material-form";
 import { formatIDR, formatQty } from "@/lib/money";
 import { Card, PageHeader, StokKosongBadge } from "@/components/ui";
+import { SearchBox, matchesQuery } from "@/components/search-box";
 import { arrow, compare, parseDir, sortHref, type Dir } from "@/lib/sort";
 
 const COLS = {
@@ -16,13 +17,15 @@ const LABELS: Record<Col, string> = { name: "Nama", qty: "Qty", value: "Nilai" }
 export default async function MaterialsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; sort?: string; dir?: string }>;
+  searchParams: Promise<{ error?: string; sort?: string; dir?: string; q?: string }>;
 }) {
   const [allRows, sp] = await Promise.all([listMaterialsWithBalance(), searchParams]);
-  const { error } = sp;
+  const { error, q } = sp;
   const sort: Col = (sp.sort && sp.sort in COLS ? sp.sort : "name") as Col;
   const dir: Dir = parseDir(sp.dir);
-  const rows = [...allRows].sort((a, b) => compare(COLS[sort](a), COLS[sort](b), dir));
+  const rows = allRows
+    .filter((r) => matchesQuery(r.brand, r.grade, q))
+    .sort((a, b) => compare(COLS[sort](a), COLS[sort](b), dir));
 
   return (
     <div>
@@ -41,14 +44,20 @@ export default async function MaterialsPage({
         <MaterialForm />
       </div>
 
+      <div className="mb-3">
+        <SearchBox action="/materials" q={q} hidden={{ sort, dir }} />
+      </div>
+
       <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
         <span className="text-slate-500">Urutkan:</span>
         {(Object.keys(COLS) as Col[]).map((col) => {
           const active = sort === col;
+          const href =
+            sortHref("/materials", col, sort, dir) + (q ? `&q=${encodeURIComponent(q)}` : "");
           return (
             <Link
               key={col}
-              href={sortHref("/materials", col, sort, dir)}
+              href={href}
               aria-current={active ? "true" : undefined}
               className={`rounded-lg border px-3 py-1.5 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
                 active
@@ -61,13 +70,22 @@ export default async function MaterialsPage({
             </Link>
           );
         })}
+        {q && (
+          <span className="ml-auto text-slate-500">
+            {rows.length} hasil untuk “{q}”
+          </span>
+        )}
       </div>
 
       <Card>
         {rows.length === 0 ? (
           <div className="px-6 py-16 text-center">
-            <p className="text-sm font-medium text-slate-900">No materials yet</p>
-            <p className="mt-1 text-sm text-slate-500">Add a brand + grade above to begin.</p>
+            <p className="text-sm font-medium text-slate-900">
+              {q ? `Tidak ada barang cocok “${q}”` : "No materials yet"}
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              {q ? "Coba kata kunci lain atau reset pencarian." : "Add a brand + grade above to begin."}
+            </p>
           </div>
         ) : (
           <ul className="divide-y divide-slate-100">

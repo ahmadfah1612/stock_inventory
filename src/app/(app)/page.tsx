@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listMaterialsWithBalance } from "@/server/materials";
 import { formatIDR, formatQty } from "@/lib/money";
 import { Card, PageHeader, StatCard, StokKosongBadge } from "@/components/ui";
+import { SearchBox, matchesQuery } from "@/components/search-box";
 import { ariaSort, arrow, compare, parseDir, sortHref, type Dir } from "@/lib/sort";
 
 const COLS = {
@@ -16,16 +17,21 @@ type Col = keyof typeof COLS;
 export default async function SummaryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string; dir?: string }>;
+  searchParams: Promise<{ sort?: string; dir?: string; q?: string }>;
 }) {
   const sp = await searchParams;
   const sort: Col = (sp.sort && sp.sort in COLS ? sp.sort : "brand") as Col;
   const dir: Dir = parseDir(sp.dir);
+  const q = sp.q;
 
   const rows = await listMaterialsWithBalance();
+  // KPI cards reflect the whole inventory, not the filtered view
   const totalValue = rows.reduce((a, r) => a + Number(r.balValue), 0);
   const outOfStock = rows.filter((r) => Number(r.balQty) === 0).length;
-  const sorted = [...rows].sort((a, b) => compare(COLS[sort](a), COLS[sort](b), dir));
+  const sorted = rows
+    .filter((r) => matchesQuery(r.brand, r.grade, q))
+    .sort((a, b) => compare(COLS[sort](a), COLS[sort](b), dir));
+  const shownTotal = sorted.reduce((a, r) => a + Number(r.balValue), 0);
 
   return (
     <div>
@@ -35,6 +41,15 @@ export default async function SummaryPage({
         <StatCard label="Total Inventory Value" value={formatIDR(totalValue)} />
         <StatCard label="Grades" value={String(rows.length)} hint="active materials" />
         <StatCard label="Out of Stock" value={String(outOfStock)} hint="grades at zero" />
+      </div>
+
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <SearchBox action="/" q={q} hidden={{ sort, dir }} />
+        {q && (
+          <span className="text-sm text-slate-500">
+            {sorted.length} hasil untuk “{q}”
+          </span>
+        )}
       </div>
 
       <Card>
@@ -51,16 +66,21 @@ export default async function SummaryPage({
               Go to Materials
             </Link>
           </div>
+        ) : sorted.length === 0 ? (
+          <div className="px-6 py-16 text-center">
+            <p className="text-sm font-medium text-slate-900">Tidak ada barang cocok “{q}”</p>
+            <p className="mt-1 text-sm text-slate-500">Coba kata kunci lain atau reset pencarian.</p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  <SortableTh col="brand" label="Barang" sort={sort} dir={dir} />
-                  <SortableTh col="grade" label="Kode Barang" sort={sort} dir={dir} />
-                  <SortableTh col="qty" label="Qty (Kg)" sort={sort} dir={dir} align="right" />
-                  <SortableTh col="price" label="Price/Kg" sort={sort} dir={dir} align="right" />
-                  <SortableTh col="total" label="Total" sort={sort} dir={dir} align="right" />
+                  <SortableTh col="brand" label="Barang" sort={sort} dir={dir} q={q} />
+                  <SortableTh col="grade" label="Kode Barang" sort={sort} dir={dir} q={q} />
+                  <SortableTh col="qty" label="Qty (Kg)" sort={sort} dir={dir} q={q} align="right" />
+                  <SortableTh col="price" label="Price/Kg" sort={sort} dir={dir} q={q} align="right" />
+                  <SortableTh col="total" label="Total" sort={sort} dir={dir} q={q} align="right" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -102,9 +122,9 @@ export default async function SummaryPage({
               <tfoot>
                 <tr className="border-t border-slate-200 bg-slate-50 font-semibold text-slate-900">
                   <td className="px-4 py-3" colSpan={4}>
-                    Total
+                    {q ? "Total (hasil pencarian)" : "Total"}
                   </td>
-                  <td className="px-4 py-3 text-right tabular">{formatIDR(totalValue)}</td>
+                  <td className="px-4 py-3 text-right tabular">{formatIDR(shownTotal)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -120,15 +140,18 @@ function SortableTh({
   label,
   sort,
   dir,
+  q,
   align = "left",
 }: {
   col: Col;
   label: string;
   sort: Col;
   dir: Dir;
+  q?: string;
   align?: "left" | "right";
 }) {
   const active = sort === col;
+  const href = sortHref("/", col, sort, dir) + (q ? `&q=${encodeURIComponent(q)}` : "");
   return (
     <th
       scope="col"
@@ -136,7 +159,7 @@ function SortableTh({
       className={`px-4 py-3 ${align === "right" ? "text-right" : "text-left"}`}
     >
       <Link
-        href={sortHref("/", col, sort, dir)}
+        href={href}
         className={`inline-flex items-center gap-0.5 rounded hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
           active ? "text-slate-900" : ""
         }`}
