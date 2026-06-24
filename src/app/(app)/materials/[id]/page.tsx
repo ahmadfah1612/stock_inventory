@@ -56,7 +56,12 @@ export default async function LedgerPage({
         subtitle="Stock card · running weighted-average cost"
         action={<PrimaryLink href={`/materials/${id}/new`}>+ Transaksi</PrimaryLink>}
       />
-      <AveragePanel action={`/materials/${id}`} from={from} to={to} saldo={saldoAtEnd(inRange)} />
+      <AveragePanel
+        action={`/materials/${id}`}
+        from={from}
+        to={to}
+        saldo={from || to ? saldoAtEnd(inRange) : null}
+      />
       <LedgerTable rows={rows} />
     </div>
   );

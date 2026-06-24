@@ -52,7 +52,11 @@ export function AveragePanel({
         </form>
       </div>
 
-      {saldo === null ? (
+      {!active ? (
+        <p className="rounded-lg bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+          Pilih tanggal lalu klik Hitung untuk melihat rata-rata saldo.
+        </p>
+      ) : saldo === null ? (
         <p className="rounded-lg bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
           Tidak ada transaksi pada rentang ini.
         </p>
