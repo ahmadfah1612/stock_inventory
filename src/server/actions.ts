@@ -7,6 +7,7 @@ import { addTransaction } from "@/server/transactions";
 import { createMaterial, deleteMaterial } from "@/server/materials";
 import { importBarangFromExcel, ImportError } from "@/server/import-excel";
 import { createUser, deleteUser, changePassword } from "@/server/users";
+import { setSetting, LOW_STOCK_KEY } from "@/server/settings";
 import type { Role } from "@/lib/auth";
 
 async function requireAdmin(): Promise<{ id: string }> {
@@ -120,6 +121,18 @@ export async function changePasswordAction(formData: FormData) {
   await changePassword(id, password);
   revalidatePath("/users");
   redirect("/users?ok=" + encodeURIComponent("Password diubah."));
+}
+
+export async function updateLowStockThresholdAction(formData: FormData) {
+  await requireAdmin();
+  const raw = String(formData.get("threshold") ?? "").trim();
+  const n = Number(raw);
+  const back = (m: string) => redirect(`/settings?error=${encodeURIComponent(m)}`);
+  if (!Number.isFinite(n) || n <= 0) back("Threshold harus angka lebih dari 0.");
+  await setSetting(LOW_STOCK_KEY, String(n));
+  revalidatePath("/settings");
+  revalidatePath("/");
+  redirect("/settings?ok=" + encodeURIComponent("Threshold disimpan."));
 }
 
 export async function importBarangAction(formData: FormData) {
