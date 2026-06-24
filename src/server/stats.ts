@@ -1,6 +1,7 @@
 import "server-only";
-import { sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
+import { materials, transactions } from "@/db/schema";
 
 export type MonthStat = { ym: string; buy: number; sell: number };
 
@@ -21,4 +22,43 @@ export async function monthlyActivity(months = 12): Promise<MonthStat[]> {
   return rows
     .map((r) => ({ ym: r.ym, buy: Number(r.buy), sell: Number(r.sell) }))
     .reverse();
+}
+
+export type RecentTxn = {
+  id: string;
+  date: string;
+  materialId: string;
+  brand: string;
+  grade: string;
+  type: string;
+  qty: string;
+};
+
+/** Latest transactions across all barang. */
+export async function recentTransactions(limit = 8): Promise<RecentTxn[]> {
+  return db
+    .select({
+      id: transactions.id,
+      date: transactions.date,
+      materialId: materials.id,
+      brand: materials.brand,
+      grade: materials.grade,
+      type: transactions.type,
+      qty: transactions.qty,
+    })
+    .from(transactions)
+    .innerJoin(materials, eq(materials.id, transactions.materialId))
+    .orderBy(desc(transactions.date), desc(transactions.seq))
+    .limit(limit);
+}
+
+/** Total cost value of goods that left as Sample or Scrap (free / written off). */
+export async function leakageTotal(): Promise<number> {
+  const res = await db.execute(sql`
+    select coalesce(sum(cogs), 0) as v
+    from transactions
+    where type in ('sample', 'scrap')
+  `);
+  const rows = (res as unknown as { rows: { v: string }[] }).rows;
+  return Number(rows[0]?.v ?? 0);
 }
