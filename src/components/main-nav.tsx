@@ -22,8 +22,8 @@ export function MainNav({ isAdmin = false }: { isAdmin?: boolean }) {
             aria-current={active ? "page" : undefined}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
               active
-                ? "bg-indigo-50 text-indigo-700"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                ? "bg-indigo-500/15 text-indigo-300"
+                : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
             }`}
           >
             {l.label}
@@ -35,8 +35,8 @@ export function MainNav({ isAdmin = false }: { isAdmin?: boolean }) {
         aria-current={pathname.startsWith("/import") ? "page" : undefined}
         className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
           pathname.startsWith("/import")
-            ? "bg-indigo-50 text-indigo-700"
-            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            ? "bg-indigo-500/15 text-indigo-300"
+            : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
         }`}
       >
         Import
@@ -46,8 +46,8 @@ export function MainNav({ isAdmin = false }: { isAdmin?: boolean }) {
         aria-current={pathname.startsWith("/export") ? "page" : undefined}
         className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
           pathname.startsWith("/export")
-            ? "bg-indigo-50 text-indigo-700"
-            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            ? "bg-indigo-500/15 text-indigo-300"
+            : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
         }`}
       >
         Export

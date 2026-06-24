@@ -4,7 +4,7 @@ import { deleteUserAction } from "@/server/actions";
 
 export function DeleteUserButton({ id, email, disabled }: { id: string; email: string; disabled?: boolean }) {
   if (disabled) {
-    return <span className="text-xs text-slate-400">akun Anda</span>;
+    return <span className="text-xs text-slate-500">akun Anda</span>;
   }
   return (
     <form
@@ -16,7 +16,7 @@ export function DeleteUserButton({ id, email, disabled }: { id: string; email: s
       <input type="hidden" name="id" value={id} />
       <button
         type="submit"
-        className="rounded-lg border border-red-300 px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-50"
+        className="rounded-lg border border-red-500/40 px-2.5 py-1 text-xs font-medium text-red-300 transition-colors hover:bg-red-500/100/10"
       >
         Hapus
       </button>

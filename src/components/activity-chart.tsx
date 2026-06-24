@@ -11,26 +11,26 @@ export function ActivityChart({ data }: { data: MonthStat[] }) {
   const hasData = data.some((m) => m.buy > 0 || m.sell > 0);
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 shadow-sm">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900">Aktivitas 12 Bulan Terakhir</h2>
-          <p className="mt-0.5 text-xs text-slate-500">Nilai Pembelian vs Penjualan per bulan.</p>
+          <h2 className="text-sm font-semibold text-slate-100">Aktivitas 12 Bulan Terakhir</h2>
+          <p className="mt-0.5 text-xs text-slate-400">Nilai Pembelian vs Penjualan per bulan.</p>
         </div>
-        <div className="flex items-center gap-4 text-xs text-slate-600">
+        <div className="flex items-center gap-4 text-xs text-slate-300">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500" aria-hidden="true" />
+            <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500/150" aria-hidden="true" />
             Pembelian
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-indigo-500" aria-hidden="true" />
+            <span className="h-2.5 w-2.5 rounded-sm bg-indigo-500/150" aria-hidden="true" />
             Penjualan
           </span>
         </div>
       </div>
 
       {!hasData ? (
-        <p className="rounded-lg bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
+        <p className="rounded-lg bg-slate-800/50 px-4 py-10 text-center text-sm text-slate-400">
           Belum ada transaksi untuk ditampilkan.
         </p>
       ) : (
@@ -39,17 +39,17 @@ export function ActivityChart({ data }: { data: MonthStat[] }) {
             <div key={m.ym} className="flex h-full flex-1 flex-col items-center">
               <div className="flex w-full flex-1 items-end justify-center gap-0.5 sm:gap-1">
                 <div
-                  className="w-2 rounded-t bg-emerald-500 transition-all sm:w-2.5"
+                  className="w-2 rounded-t bg-emerald-500/150 transition-all sm:w-2.5"
                   style={{ height: pct(m.buy) }}
                   title={`Pembelian ${monthLabel(m.ym)}: ${formatIDR(m.buy)}`}
                 />
                 <div
-                  className="w-2 rounded-t bg-indigo-500 transition-all sm:w-2.5"
+                  className="w-2 rounded-t bg-indigo-500/150 transition-all sm:w-2.5"
                   style={{ height: pct(m.sell) }}
                   title={`Penjualan ${monthLabel(m.ym)}: ${formatIDR(m.sell)}`}
                 />
               </div>
-              <span className="mt-1.5 whitespace-nowrap text-[10px] tabular text-slate-400">
+              <span className="mt-1.5 whitespace-nowrap text-[10px] tabular text-slate-500">
                 {monthLabel(m.ym)}
               </span>
             </div>

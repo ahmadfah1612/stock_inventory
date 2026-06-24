@@ -33,9 +33,9 @@ export default async function LedgerPage({
   const [mat] = await db.select().from(materials).where(eq(materials.id, id));
   if (!mat) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-        <p className="text-sm font-medium text-slate-900">Material not found</p>
-        <Link href="/materials" className="mt-3 inline-flex text-sm font-medium text-indigo-700 hover:underline">
+      <div className="rounded-xl border border-slate-800 bg-slate-900 px-6 py-16 text-center shadow-sm">
+        <p className="text-sm font-medium text-slate-100">Material not found</p>
+        <Link href="/materials" className="mt-3 inline-flex text-sm font-medium text-indigo-300 hover:underline">
           Back to Materials
         </Link>
       </div>
@@ -49,7 +49,7 @@ export default async function LedgerPage({
       <div className="mb-4">
         <Link
           href="/materials"
-          className="text-sm font-medium text-slate-500 hover:text-slate-700"
+          className="text-sm font-medium text-slate-400 hover:text-slate-200"
         >
           ← Materials
         </Link>

@@ -14,8 +14,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .toUpperCase();
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <div className="flex min-h-screen flex-col bg-slate-950">
+      <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-900/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex items-center gap-2.5">
             <span
@@ -24,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             >
               SI
             </span>
-            <span className="text-sm font-semibold tracking-tight text-slate-900 sm:text-base">
+            <span className="text-sm font-semibold tracking-tight text-slate-100 sm:text-base">
               Stock Inventory
             </span>
           </div>
@@ -40,12 +40,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           >
             <span
               aria-hidden="true"
-              className="hidden h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700 sm:flex"
+              className="hidden h-8 w-8 items-center justify-center rounded-full bg-slate-700 text-xs font-semibold text-slate-200 sm:flex"
             >
               {initials}
             </span>
-            <span className="hidden text-sm text-slate-600 md:inline">{session.user.name}</span>
-            <button className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            <span className="hidden text-sm text-slate-300 md:inline">{session.user.name}</span>
+            <button className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
               Keluar
             </button>
           </form>

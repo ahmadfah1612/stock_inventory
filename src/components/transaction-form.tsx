@@ -4,8 +4,8 @@ import { useState } from "react";
 import { createTransactionAction } from "@/server/actions";
 
 const inputCls =
-  "block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-2 focus:outline-offset-0 focus:outline-indigo-500";
-const labelCls = "block text-sm font-medium text-slate-700";
+  "block w-full rounded-lg border border-slate-700 px-3 py-2.5 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-indigo-500 focus:outline-2 focus:outline-offset-0 focus:outline-indigo-500";
+const labelCls = "block text-sm font-medium text-slate-200";
 
 export function TransactionForm({ materialId, error }: { materialId: string; error?: string }) {
   const [type, setType] = useState("buy");
@@ -13,12 +13,12 @@ export function TransactionForm({ materialId, error }: { materialId: string; err
   return (
     <form
       action={createTransactionAction}
-      className="max-w-lg space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="max-w-lg space-y-5 rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-sm"
     >
       {error && (
         <p
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300"
         >
           {error}
         </p>
@@ -61,7 +61,7 @@ export function TransactionForm({ materialId, error }: { materialId: string; err
         {type === "sell" && (
           <div className="space-y-1.5">
             <label htmlFor="salePrice" className={labelCls}>
-              Harga Jual / Kg <span className="font-normal text-slate-400">(opsional)</span>
+              Harga Jual / Kg <span className="font-normal text-slate-500">(opsional)</span>
             </label>
             <input id="salePrice" name="salePrice" inputMode="decimal" placeholder="0" className={inputCls} />
           </div>

@@ -15,7 +15,7 @@ export function SearchBox({
         <input key={k} type="hidden" name={k} value={v} />
       ))}
       <div className="relative flex-1 sm:max-w-xs">
-        <span aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <span aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
           ⌕
         </span>
         <input
@@ -24,7 +24,7 @@ export function SearchBox({
           defaultValue={q}
           placeholder="Cari barang…"
           aria-label="Cari barang"
-          className="block w-full rounded-lg border border-slate-300 py-2 pl-8 pr-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-2 focus:outline-offset-0 focus:outline-indigo-500"
+          className="block w-full rounded-lg border border-slate-700 py-2 pl-8 pr-3 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-indigo-500 focus:outline-2 focus:outline-offset-0 focus:outline-indigo-500"
         />
       </div>
       <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
@@ -33,7 +33,7 @@ export function SearchBox({
       {q && (
         <Link
           href={action}
-          className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+          className="rounded-lg border border-slate-800 px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
         >
           Reset
         </Link>

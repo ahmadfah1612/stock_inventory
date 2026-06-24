@@ -19,12 +19,12 @@ export function ExportForm({ items }: { items: ExportItem[] }) {
   return (
     <form action="/export/download" method="post">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+        <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-200">
           <input
             type="checkbox"
             checked={allChecked}
             onChange={(e) => setAll(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+            className="h-4 w-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500"
           />
           Pilih semua ({items.length})
         </label>
@@ -32,38 +32,38 @@ export function ExportForm({ items }: { items: ExportItem[] }) {
           <button
             type="button"
             onClick={() => setAll(true)}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            className="rounded-lg border border-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800"
           >
             Semua
           </button>
           <button
             type="button"
             onClick={() => setSelected(new Set(items.filter((i) => i.inStock).map((i) => i.id)))}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            className="rounded-lg border border-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800"
           >
             Hanya ada stok
           </button>
         </div>
       </div>
 
-      <div className="max-h-96 overflow-y-auto rounded-xl border border-slate-200">
-        <ul className="divide-y divide-slate-100">
+      <div className="max-h-96 overflow-y-auto rounded-xl border border-slate-800">
+        <ul className="divide-y divide-slate-800">
           {items.map((i) => (
             <li key={i.id}>
-              <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-slate-50">
+              <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 hover:bg-slate-800/50">
                 <input
                   type="checkbox"
                   name="id"
                   value={i.id}
                   checked={selected.has(i.id)}
                   onChange={() => toggle(i.id)}
-                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  className="h-4 w-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500"
                 />
-                <span className="flex-1 text-sm text-slate-900">
-                  {i.brand} <span className="text-slate-500">{i.grade}</span>
+                <span className="flex-1 text-sm text-slate-100">
+                  {i.brand} <span className="text-slate-400">{i.grade}</span>
                 </span>
                 {!i.inStock && (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                  <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-400">
                     Stok Kosong
                   </span>
                 )}
@@ -74,7 +74,7 @@ export function ExportForm({ items }: { items: ExportItem[] }) {
       </div>
 
       <div className="mt-4 flex items-center justify-between">
-        <p className="text-sm text-slate-500">{selected.size} barang dipilih</p>
+        <p className="text-sm text-slate-400">{selected.size} barang dipilih</p>
         <button
           type="submit"
           disabled={selected.size === 0}

@@ -2,7 +2,7 @@ import { importBarangAction } from "@/server/actions";
 import { PageHeader } from "@/components/ui";
 
 const inputCls =
-  "block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-2 focus:outline-offset-0 focus:outline-indigo-500";
+  "block w-full rounded-lg border border-slate-700 px-3 py-2.5 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-indigo-500 focus:outline-2 focus:outline-offset-0 focus:outline-indigo-500";
 
 export default async function ImportPage({
   searchParams,
@@ -20,12 +20,12 @@ export default async function ImportPage({
       <form
         action={importBarangAction}
         encType="multipart/form-data"
-        className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="space-y-5 rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-sm"
       >
         {error && (
           <p
             role="alert"
-            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+            className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300"
           >
             {error}
           </p>
@@ -33,13 +33,13 @@ export default async function ImportPage({
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label htmlFor="brand" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="brand" className="block text-sm font-medium text-slate-200">
               Barang
             </label>
             <input id="brand" name="brand" required placeholder="e.g. Exxon" className={inputCls} />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="grade" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="grade" className="block text-sm font-medium text-slate-200">
               Kode Barang
             </label>
             <input id="grade" name="grade" required placeholder="e.g. AP03B" className={inputCls} />
@@ -47,7 +47,7 @@ export default async function ImportPage({
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="file" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="file" className="block text-sm font-medium text-slate-200">
             File Excel (.xlsx)
           </label>
           <input
@@ -56,12 +56,12 @@ export default async function ImportPage({
             type="file"
             accept=".xlsx"
             required
-            className="block w-full text-sm text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100"
+            className="block w-full text-sm text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500/150/20 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-300 hover:file:bg-indigo-500/150/200/30"
           />
         </div>
 
-        <div className="rounded-lg bg-slate-50 px-4 py-3 text-xs text-slate-500">
-          <p className="font-medium text-slate-600">Format yang diharapkan:</p>
+        <div className="rounded-lg bg-slate-800/50 px-4 py-3 text-xs text-slate-400">
+          <p className="font-medium text-slate-300">Format yang diharapkan:</p>
           <p className="mt-1">
             Baris 1: Tanggal · No SJ · Buy/Sell/Sample · Customer · Pembelian · Penjualan · Saldo.
             Baris 2: Unit · Harga · Jumlah (×3). Data mulai baris 3. File yang tidak sesuai akan

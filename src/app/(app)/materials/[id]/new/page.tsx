@@ -14,7 +14,7 @@ export default async function NewTxnPage({
   return (
     <div>
       <div className="mb-4">
-        <Link href={`/materials/${id}`} className="text-sm font-medium text-slate-500 hover:text-slate-700">
+        <Link href={`/materials/${id}`} className="text-sm font-medium text-slate-400 hover:text-slate-200">
           ← Kembali ke stock card
         </Link>
       </div>

@@ -17,7 +17,7 @@ export default async function ExportPage() {
         title="Export ke Excel"
         subtitle="Pilih barang yang ingin diekspor. Tiap barang menjadi satu sheet (kartu stok), plus sheet ringkasan."
       />
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 shadow-sm">
         <ExportForm items={items} />
       </div>
     </div>
