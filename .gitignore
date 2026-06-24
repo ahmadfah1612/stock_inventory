@@ -43,3 +43,8 @@ next-env.d.ts
 
 # import pipeline scratch
 scripts/.import-data.json
+
+# local test artifacts
+.playwright-mcp/
+picker.png
+dashboard.png
