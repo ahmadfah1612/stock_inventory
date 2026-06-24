@@ -42,10 +42,9 @@ export default async function SummaryPage({
   const shownTotal = sorted.reduce((a, r) => a + Number(r.balValue), 0);
 
   const top = rows
-    .filter((r) => Number(r.balValue) > 0)
-    .sort((a, b) => Number(b.balValue) - Number(a.balValue))
-    .slice(0, 5)
-    .map((r) => ({ id: r.id, brand: r.brand, grade: r.grade, value: Number(r.balValue) }));
+    .filter((r) => Number(r.balQty) > 0)
+    .sort((a, b) => Number(b.balQty) - Number(a.balQty))
+    .map((r) => ({ id: r.id, brand: r.brand, grade: r.grade, qty: Number(r.balQty) }));
 
   return (
     <div>
