@@ -8,11 +8,12 @@ const links = [
   { href: "/materials", label: "Materials" },
 ];
 
-export function MainNav() {
+export function MainNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+  const items = isAdmin ? [...links, { href: "/users", label: "Users" }] : links;
   return (
     <nav aria-label="Primary" className="flex items-center gap-1">
-      {links.map((l) => {
+      {items.map((l) => {
         const active = l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
         return (
           <Link

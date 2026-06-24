@@ -15,7 +15,7 @@
 5. **Migrate + seed** (first deploy only) via the Dokploy app shell / a one-off container:
    ```bash
    pnpm db:migrate
-   pnpm seed <email> <password> "<Name>"
+   pnpm seed <email> <password> "<Name>" admin   # role: admin | user (default user)
    ```
 6. **Domain**: Map a domain in Dokploy; it provisions HTTPS automatically.
 
@@ -31,7 +31,7 @@ cp .env.example .env   # then edit DATABASE_URL / AUTH_SECRET
 
 pnpm install
 pnpm db:migrate
-pnpm seed admin@bps.local admin123 Admin
+pnpm seed admin@bps.local admin123 Admin admin
 pnpm dev                 # http://localhost:3000
 
 # Optional demo data:

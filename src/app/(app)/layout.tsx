@@ -29,7 +29,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </span>
           </div>
 
-          <MainNav />
+          <MainNav isAdmin={session.user.role === "admin"} />
 
           <form
             action={async () => {

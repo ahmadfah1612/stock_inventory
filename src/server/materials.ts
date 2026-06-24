@@ -29,3 +29,8 @@ export async function listMaterialsWithBalance(): Promise<MaterialSummary[]> {
 export async function createMaterial(input: { brand: string; grade: string }) {
   await db.insert(materials).values({ brand: input.brand.trim(), grade: input.grade.trim() });
 }
+
+/** Deletes a material and its transactions (FK cascade). */
+export async function deleteMaterial(id: string) {
+  await db.delete(materials).where(eq(materials.id, id));
+}

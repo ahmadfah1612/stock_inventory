@@ -4,8 +4,17 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { addTransaction } from "@/server/transactions";
-import { createMaterial } from "@/server/materials";
+import { createMaterial, deleteMaterial } from "@/server/materials";
 import { importBarangFromExcel, ImportError } from "@/server/import-excel";
+import { createUser, deleteUser, changePassword } from "@/server/users";
+import type { Role } from "@/lib/auth";
+
+async function requireAdmin(): Promise<{ id: string }> {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  if (session.user.role !== "admin") redirect("/");
+  return { id: session.user.id };
+}
 
 const schema = z.object({
   materialId: z.string().uuid(),
@@ -55,6 +64,62 @@ export async function createMaterialAction(formData: FormData) {
   }
   revalidatePath("/materials");
   redirect("/materials");
+}
+
+export async function deleteMaterialAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  // RBAC: only admin may delete barang
+  if (session.user.role !== "admin") {
+    redirect(`/materials?error=${encodeURIComponent("Hanya admin yang dapat menghapus barang.")}`);
+  }
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/materials");
+  await deleteMaterial(id);
+  revalidatePath("/materials");
+  revalidatePath("/");
+  redirect(`/materials?deleted=1`);
+}
+
+export async function createUserAction(formData: FormData) {
+  await requireAdmin();
+  const email = String(formData.get("email") ?? "").trim();
+  const name = String(formData.get("name") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const role: Role = formData.get("role") === "admin" ? "admin" : "user";
+  const back = (m: string) => redirect(`/users?error=${encodeURIComponent(m)}`);
+  if (!email || !name || !password) back("Email, nama, dan password wajib diisi.");
+  if (password.length < 6) back("Password minimal 6 karakter.");
+  try {
+    await createUser({ email, name, password, role });
+  } catch (e) {
+    if ((e as { code?: string }).code === "23505") back(`Email ${email} sudah terdaftar.`);
+    throw e;
+  }
+  revalidatePath("/users");
+  redirect("/users?ok=" + encodeURIComponent("User ditambahkan."));
+}
+
+export async function deleteUserAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/users");
+  if (id === admin.id) redirect(`/users?error=${encodeURIComponent("Tidak bisa menghapus akun sendiri.")}`);
+  await deleteUser(id);
+  revalidatePath("/users");
+  redirect("/users?ok=" + encodeURIComponent("User dihapus."));
+}
+
+export async function changePasswordAction(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const back = (m: string) => redirect(`/users?error=${encodeURIComponent(m)}`);
+  if (!id) redirect("/users");
+  if (password.length < 6) back("Password minimal 6 karakter.");
+  await changePassword(id, password);
+  revalidatePath("/users");
+  redirect("/users?ok=" + encodeURIComponent("Password diubah."));
 }
 
 export async function importBarangAction(formData: FormData) {

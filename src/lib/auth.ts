@@ -6,14 +6,17 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import "next-auth/jwt";
 
+export type Role = "admin" | "user";
+
 declare module "next-auth" {
   interface Session {
-    user: { id: string } & import("next-auth").DefaultSession["user"];
+    user: { id: string; role: Role } & import("next-auth").DefaultSession["user"];
   }
 }
 declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
+    role?: Role;
   }
 }
 
@@ -27,7 +30,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const [u] = await db.select().from(users).where(eq(users.email, email));
         if (!u) return null;
         if (!(await bcrypt.compare(password, u.passwordHash))) return null;
-        return { id: u.id, email: u.email, name: u.name };
+        return { id: u.id, email: u.email, name: u.name, role: u.role };
       },
     }),
   ],
@@ -35,11 +38,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   callbacks: {
     jwt({ token, user }) {
-      if (user) token.id = user.id;
+      if (user) {
+        token.id = user.id;
+        token.role = (user as { role?: Role }).role ?? "user";
+      }
       return token;
     },
     session({ session, token }) {
-      if (session.user && token.id) session.user.id = token.id as string;
+      if (session.user) {
+        if (token.id) session.user.id = token.id as string;
+        session.user.role = (token.role as Role) ?? "user";
+      }
       return session;
     },
   },

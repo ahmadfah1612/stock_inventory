@@ -17,10 +17,10 @@ const LABELS: Record<Col, string> = { name: "Nama", qty: "Qty", value: "Nilai" }
 export default async function MaterialsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; sort?: string; dir?: string; q?: string }>;
+  searchParams: Promise<{ error?: string; sort?: string; dir?: string; q?: string; deleted?: string }>;
 }) {
   const [allRows, sp] = await Promise.all([listMaterialsWithBalance(), searchParams]);
-  const { error, q } = sp;
+  const { error, q, deleted } = sp;
   const sort: Col = (sp.sort && sp.sort in COLS ? sp.sort : "name") as Col;
   const dir: Dir = parseDir(sp.dir);
   const rows = allRows
@@ -37,6 +37,14 @@ export default async function MaterialsPage({
           className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
         >
           {error}
+        </p>
+      )}
+      {deleted && (
+        <p
+          role="status"
+          className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+        >
+          Barang berhasil dihapus.
         </p>
       )}
 

@@ -3,9 +3,11 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { materials, transactions } from "@/db/schema";
 import { listLedger } from "@/server/transactions";
+import { auth } from "@/lib/auth";
 import { LedgerTable } from "@/components/ledger-table";
 import { PageHeader, PrimaryLink } from "@/components/ui";
 import { AveragePanel, type Saldo } from "@/components/average-panel";
+import { DeleteBarangButton } from "@/components/delete-barang-button";
 import type { InferSelectModel } from "drizzle-orm";
 
 type Txn = InferSelectModel<typeof transactions>;
@@ -39,7 +41,8 @@ export default async function LedgerPage({
       </div>
     );
   }
-  const rows: Txn[] = await listLedger(id);
+  const [rows, session] = await Promise.all([listLedger(id), auth()]);
+  const isAdmin = session?.user?.role === "admin";
   const inRange = rows.filter((r) => (!from || r.date >= from) && (!to || r.date <= to));
   return (
     <div>
@@ -54,7 +57,12 @@ export default async function LedgerPage({
       <PageHeader
         title={`${mat.brand} ${mat.grade}`}
         subtitle="Stock card · running weighted-average cost"
-        action={<PrimaryLink href={`/materials/${id}/new`}>+ Transaksi</PrimaryLink>}
+        action={
+          <div className="flex items-center gap-2">
+            <PrimaryLink href={`/materials/${id}/new`}>+ Transaksi</PrimaryLink>
+            {isAdmin && <DeleteBarangButton id={id} label={`${mat.brand} ${mat.grade}`} />}
+          </div>
+        }
       />
       <AveragePanel
         action={`/materials/${id}`}
