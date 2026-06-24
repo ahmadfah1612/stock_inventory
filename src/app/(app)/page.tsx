@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { format } from "date-fns";
-import { id as idLocale } from "date-fns/locale";
 import { listMaterialsWithBalance } from "@/server/materials";
-import { monthlyActivity, recentTransactions, leakageTotal } from "@/server/stats";
+import { monthlyActivity, recentTransactions } from "@/server/stats";
 import { ActivityChart } from "@/components/activity-chart";
 import { RecentTransactions } from "@/components/recent-transactions";
 import { TopBarang } from "@/components/top-barang";
@@ -10,8 +8,6 @@ import { formatIDR, formatQty } from "@/lib/money";
 import { Card, PageHeader, StatCard, StokKosongBadge } from "@/components/ui";
 import { SearchBox, matchesQuery } from "@/components/search-box";
 import { ariaSort, arrow, compare, parseDir, sortHref, type Dir } from "@/lib/sort";
-
-const monthLabel = (ym: string) => format(new Date(`${ym}-01T00:00:00`), "MMMM yyyy", { locale: idLocale });
 
 const COLS = {
   brand: (r: { brand: string }) => r.brand,
@@ -32,11 +28,10 @@ export default async function SummaryPage({
   const dir: Dir = parseDir(sp.dir);
   const q = sp.q;
 
-  const [rows, activity, recent, leakage] = await Promise.all([
+  const [rows, activity, recent] = await Promise.all([
     listMaterialsWithBalance(),
     monthlyActivity(12),
     recentTransactions(8),
-    leakageTotal(),
   ]);
   // KPI cards reflect the whole inventory, not the filtered view
   const totalValue = rows.reduce((a, r) => a + Number(r.balValue), 0);
@@ -46,8 +41,6 @@ export default async function SummaryPage({
     .sort((a, b) => compare(COLS[sort](a), COLS[sort](b), dir));
   const shownTotal = sorted.reduce((a, r) => a + Number(r.balValue), 0);
 
-  const cur = activity.at(-1);
-  const prev = activity.at(-2);
   const top = rows
     .filter((r) => Number(r.balValue) > 0)
     .sort((a, b) => Number(b.balValue) - Number(a.balValue))
@@ -58,19 +51,11 @@ export default async function SummaryPage({
     <div>
       <PageHeader title="Summary" subtitle="Inventory across all material grades" />
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Total Inventory Value" value={formatIDR(totalValue)} />
         <StatCard label="Barang" value={String(rows.length)} hint="active materials" />
         <StatCard label="Out of Stock" value={String(outOfStock)} hint="grades at zero" />
-        <StatCard label="Sample + Scrap" value={formatIDR(leakage)} hint="nilai barang keluar gratis" />
       </div>
-
-      {cur && (
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <MonthCard label="Pembelian" month={cur.ym} value={cur.buy} prev={prev?.buy} />
-          <MonthCard label="Penjualan" month={cur.ym} value={cur.sell} prev={prev?.sell} />
-        </div>
-      )}
 
       <div className="mb-6">
         <ActivityChart data={activity} />
@@ -169,43 +154,6 @@ export default async function SummaryPage({
           </div>
         )}
       </Card>
-    </div>
-  );
-}
-
-function MonthCard({
-  label,
-  month,
-  value,
-  prev,
-}: {
-  label: string;
-  month: string;
-  value: number;
-  prev?: number;
-}) {
-  const delta = prev != null && prev > 0 ? ((value - prev) / prev) * 100 : null;
-  const up = delta != null && delta >= 0;
-  return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-slate-400">
-          {label} <span className="text-slate-500">· {monthLabel(month)}</span>
-        </p>
-        {delta != null && (
-          <span
-            className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium ${
-              up ? "bg-emerald-500/15 text-emerald-300" : "bg-rose-500/15 text-rose-300"
-            }`}
-          >
-            {up ? "▲" : "▼"} {Math.abs(delta).toFixed(0)}%
-          </span>
-        )}
-      </div>
-      <p className="mt-1.5 text-2xl font-semibold tracking-tight text-slate-100 tabular">
-        {formatIDR(value)}
-      </p>
-      <p className="mt-1 text-xs text-slate-500">vs bulan sebelumnya</p>
     </div>
   );
 }
