@@ -16,7 +16,7 @@ export function DeleteUserButton({ id, email, disabled }: { id: string; email: s
       <input type="hidden" name="id" value={id} />
       <button
         type="submit"
-        className="rounded-lg border border-red-500/40 px-2.5 py-1 text-xs font-medium text-red-300 transition-colors hover:bg-red-500/10"
+        className="cursor-pointer rounded-lg border border-red-500/40 px-2.5 py-1 text-xs font-medium text-red-300 transition-colors hover:bg-red-500/10"
       >
         Hapus
       </button>

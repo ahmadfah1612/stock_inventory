@@ -55,7 +55,7 @@ function SingleDatePicker({
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-labelledby={labelId}
-        className="inline-flex w-44 items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-100 shadow-sm hover:bg-slate-800/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        className="inline-flex w-44 cursor-pointer items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-100 shadow-sm hover:bg-slate-800/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       >
         <span aria-hidden="true" className="text-slate-500">
           🗓
@@ -91,7 +91,7 @@ function SingleDatePicker({
                   onChange(undefined);
                   setOpen(false);
                 }}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                className="cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800"
               >
                 Hapus
               </button>
@@ -146,7 +146,7 @@ export function DateRangePicker({
       <button
         type="button"
         onClick={apply}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       >
         Hitung
       </button>
@@ -154,7 +154,7 @@ export function DateRangePicker({
         <button
           type="button"
           onClick={reset}
-          className="rounded-lg border border-slate-800 px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+          className="cursor-pointer rounded-lg border border-slate-800 px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
         >
           Reset
         </button>

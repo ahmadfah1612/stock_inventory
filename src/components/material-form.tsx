@@ -21,7 +21,7 @@ export function MaterialForm() {
         </label>
         <input id="grade" name="grade" required placeholder="e.g. AP03B" className={inputCls} />
       </div>
-      <button className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+      <button className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
         + Tambah
       </button>
     </form>

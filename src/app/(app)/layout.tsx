@@ -45,7 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               {initials}
             </span>
             <span className="hidden text-sm text-slate-300 md:inline">{session.user.name}</span>
-            <button className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            <button className="cursor-pointer rounded-lg border border-slate-700 px-3 py-1.5 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
               Keluar
             </button>
           </form>

@@ -32,14 +32,14 @@ export function ExportForm({ items }: { items: ExportItem[] }) {
           <button
             type="button"
             onClick={() => setAll(true)}
-            className="rounded-lg border border-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800"
+            className="cursor-pointer rounded-lg border border-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800"
           >
             Semua
           </button>
           <button
             type="button"
             onClick={() => setSelected(new Set(items.filter((i) => i.inStock).map((i) => i.id)))}
-            className="rounded-lg border border-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800"
+            className="cursor-pointer rounded-lg border border-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-800"
           >
             Hanya ada stok
           </button>
@@ -78,7 +78,7 @@ export function ExportForm({ items }: { items: ExportItem[] }) {
         <button
           type="submit"
           disabled={selected.size === 0}
-          className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
           Export ke Excel
         </button>

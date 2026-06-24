@@ -59,7 +59,7 @@ export default async function UsersPage({
           </div>
         </div>
         <div className="mt-4 flex justify-end">
-          <button className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">
+          <button className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">
             Tambah User
           </button>
         </div>
@@ -104,7 +104,7 @@ export default async function UsersPage({
                       placeholder="password baru"
                       className="w-36 rounded-lg border border-slate-700 px-2 py-1.5 text-xs focus:border-indigo-500 focus:outline-2 focus:outline-indigo-500"
                     />
-                    <button className="rounded-lg border border-slate-700 px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800">
+                    <button className="cursor-pointer rounded-lg border border-slate-700 px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800">
                       Ubah
                     </button>
                   </form>

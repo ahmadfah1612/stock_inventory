@@ -51,7 +51,7 @@ export function MainNav({ isAdmin = false }: { isAdmin?: boolean }) {
         aria-expanded={open}
         aria-controls="mobile-nav"
         onClick={() => setOpen((v) => !v)}
-        className="rounded-lg border border-slate-700 p-2 text-slate-200 transition-colors hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:hidden"
+        className="cursor-pointer rounded-lg border border-slate-700 p-2 text-slate-200 transition-colors hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:hidden"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
