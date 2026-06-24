@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     .orderBy(asc(materials.brand), asc(materials.grade));
 
   const wb = new ExcelJS.Workbook();
-  wb.creator = "Stock PP";
+  wb.creator = "Stock Inventory";
   wb.created = new Date();
   const used = new Set<string>();
 

@@ -20,12 +20,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-2.5">
             <span
               aria-hidden="true"
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white"
             >
-              SP
+              SI
             </span>
             <span className="text-sm font-semibold tracking-tight text-slate-900 sm:text-base">
-              Stock PP
+              Stock Inventory
             </span>
           </div>
 

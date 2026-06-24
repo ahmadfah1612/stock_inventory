@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Stock PP — Warehouse Inventory",
-  description: "Stock tracking for PT.BATARA PRABU SA",
+  title: "Stock Inventory",
+  description: "Warehouse stock inventory tracker",
 };
 
 export default function RootLayout({
