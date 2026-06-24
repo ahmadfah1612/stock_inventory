@@ -4,6 +4,7 @@ import { monthlyActivity, recentTransactions } from "@/server/stats";
 import { ActivityChart } from "@/components/activity-chart";
 import { RecentTransactions } from "@/components/recent-transactions";
 import { TopBarang } from "@/components/top-barang";
+import { LowStock } from "@/components/low-stock";
 import { formatIDR, formatQty } from "@/lib/money";
 import { Card, PageHeader, StatCard, StokKosongBadge } from "@/components/ui";
 import { SearchBox, matchesQuery } from "@/components/search-box";
@@ -46,13 +47,20 @@ export default async function SummaryPage({
     .sort((a, b) => Number(b.balQty) - Number(a.balQty))
     .map((r) => ({ id: r.id, brand: r.brand, grade: r.grade, qty: Number(r.balQty) }));
 
+  const LOW_STOCK = 100; // Kg
+  const lowStock = rows
+    .filter((r) => Number(r.balQty) > 0 && Number(r.balQty) < LOW_STOCK)
+    .sort((a, b) => Number(a.balQty) - Number(b.balQty))
+    .map((r) => ({ id: r.id, brand: r.brand, grade: r.grade, qty: Number(r.balQty) }));
+
   return (
     <div>
       <PageHeader title="Summary" subtitle="Inventory across all material grades" />
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Inventory Value" value={formatIDR(totalValue)} />
         <StatCard label="Barang" value={String(rows.length)} hint="active materials" />
+        <StatCard label="Stok Menipis" value={String(lowStock.length)} hint="< 100 Kg" />
         <StatCard label="Out of Stock" value={String(outOfStock)} hint="grades at zero" />
       </div>
 
@@ -61,7 +69,11 @@ export default async function SummaryPage({
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <LowStock items={lowStock} threshold={LOW_STOCK} />
         <TopBarang items={top} />
+      </div>
+
+      <div className="mb-6">
         <RecentTransactions rows={recent} />
       </div>
 
