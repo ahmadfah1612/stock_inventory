@@ -12,8 +12,6 @@ const CUST_COLS = {
   txns: (r: { txns: number }) => r.txns,
   qty: (r: { qty: number }) => r.qty,
   revenue: (r: { revenue: number }) => r.revenue,
-  profit: (r: { profit: number }) => r.profit,
-  margin: (r: { margin: number }) => r.margin,
   last: (r: { last: string }) => r.last,
 } as const;
 
@@ -196,20 +194,17 @@ async function CustomerView({
     .filter((r) => !q || r.name.toLowerCase().includes(q))
     .sort((a, b) => compare(CUST_COLS[sortKey](a), CUST_COLS[sortKey](b), dir));
   const topRevenue = [...rows].sort((a, b) => b.revenue - a.revenue).slice(0, 5).map((r) => ({ name: r.name, value: r.revenue }));
-  const topProfit = [...rows].sort((a, b) => b.profit - a.profit).slice(0, 5).map((r) => ({ name: r.name, value: r.profit }));
 
   return (
     <>
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Total Customer" value={String(kpi.customers)} />
         <StatCard label="Total Revenue" value={formatIDR(kpi.revenue)} />
-        <StatCard label="Total Profit" value={formatIDR(kpi.profit)} />
-        <StatCard label="Margin Rata-rata" value={`${kpi.margin.toFixed(1)}%`} />
+        <StatCard label="Total Qty Terjual" value={formatQty(kpi.qty)} />
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="mb-6">
         <TopBars title="Top 5 Customer — Revenue" items={topRevenue} />
-        <TopBars title="Top 5 Customer — Profit" items={topProfit} />
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -220,9 +215,7 @@ async function CustomerView({
       <SortBar
         fields={[
           { key: "revenue", label: "Revenue" },
-          { key: "profit", label: "Profit" },
           { key: "qty", label: "Qty" },
-          { key: "margin", label: "Margin" },
           { key: "txns", label: "Transaksi" },
           { key: "last", label: "Terakhir" },
           { key: "name", label: "Nama" },
@@ -248,8 +241,6 @@ async function CustomerView({
                 <div className="flex shrink-0 items-center gap-5">
                   <Stat label="Qty" value={formatQty(r.qty)} />
                   <Stat label="Revenue" value={formatIDR(r.revenue)} />
-                  <Stat label="Profit" value={formatIDR(r.profit)} />
-                  <Stat label="Margin" value={`${r.margin.toFixed(1)}%`} />
                   <span aria-hidden="true" className="text-slate-500 transition-transform group-open:rotate-180">▾</span>
                 </div>
               </summary>

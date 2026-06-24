@@ -12,9 +12,6 @@ export type CustomerRow = {
   txns: number;
   qty: number;
   revenue: number;
-  cogs: number;
-  profit: number;
-  margin: number; // %
   last: string;
   products: ProductLine[];
 };
@@ -31,7 +28,7 @@ export type SupplierRow = {
 
 export type CustomerReport = {
   rows: CustomerRow[];
-  kpi: { customers: number; revenue: number; profit: number; margin: number };
+  kpi: { customers: number; revenue: number; qty: number };
 };
 
 export type SupplierReport = {
@@ -47,8 +44,6 @@ async function loadJoined() {
       qty: transactions.qty,
       unitCost: transactions.unitCost,
       revenue: transactions.revenue,
-      cogs: transactions.cogs,
-      profit: transactions.profit,
       counterparty: transactions.counterparty,
       brand: materials.brand,
       grade: materials.grade,
@@ -67,13 +62,10 @@ export async function customerReport(): Promise<CustomerReport> {
   for (const r of sells) {
     const name = r.counterparty?.trim() || NO_NAME;
     const row =
-      map.get(name) ??
-      { name, txns: 0, qty: 0, revenue: 0, cogs: 0, profit: 0, margin: 0, last: "", products: [] };
+      map.get(name) ?? { name, txns: 0, qty: 0, revenue: 0, last: "", products: [] };
     row.txns += 1;
     row.qty += Number(r.qty);
     row.revenue += Number(r.revenue);
-    row.cogs += Number(r.cogs);
-    row.profit += Number(r.profit);
     if (r.date > row.last) row.last = r.date;
     map.set(name, row);
 
@@ -87,20 +79,16 @@ export async function customerReport(): Promise<CustomerReport> {
   }
 
   const rows = [...map.values()].map((row) => {
-    row.margin = row.revenue > 0 ? (row.profit / row.revenue) * 100 : 0;
     row.products = [...(prod.get(row.name)?.values() ?? [])].sort((a, b) => b.value - a.value);
     return row;
   });
 
-  const revenue = rows.reduce((a, r) => a + r.revenue, 0);
-  const profit = rows.reduce((a, r) => a + r.profit, 0);
   return {
     rows,
     kpi: {
       customers: rows.length,
-      revenue,
-      profit,
-      margin: revenue > 0 ? (profit / revenue) * 100 : 0,
+      revenue: rows.reduce((a, r) => a + r.revenue, 0),
+      qty: rows.reduce((a, r) => a + r.qty, 0),
     },
   };
 }
