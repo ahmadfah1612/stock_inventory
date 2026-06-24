@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { addTransaction } from "@/server/transactions";
 import { createMaterial } from "@/server/materials";
+import { importBarangFromExcel, ImportError } from "@/server/import-excel";
 
 const schema = z.object({
   materialId: z.string().uuid(),
@@ -54,4 +55,32 @@ export async function createMaterialAction(formData: FormData) {
   }
   revalidatePath("/materials");
   redirect("/materials");
+}
+
+export async function importBarangAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const brand = String(formData.get("brand") ?? "").trim();
+  const grade = String(formData.get("grade") ?? "").trim();
+  const file = formData.get("file");
+
+  const back = (msg: string) => redirect(`/import?error=${encodeURIComponent(msg)}`);
+  if (!brand || !grade) back("Barang dan Kode Barang wajib diisi.");
+  if (!(file instanceof File) || file.size === 0) back("Pilih file Excel (.xlsx) untuk diimpor.");
+
+  const f = file as File;
+  if (!f.name.toLowerCase().endsWith(".xlsx")) back("File harus berformat .xlsx.");
+
+  let materialId: string;
+  try {
+    const buf = await f.arrayBuffer();
+    materialId = await importBarangFromExcel(buf, brand, grade, session.user.id);
+  } catch (e) {
+    if (e instanceof ImportError) back(e.message);
+    throw e;
+  }
+  revalidatePath("/materials");
+  revalidatePath("/");
+  redirect(`/materials/${materialId}`);
 }

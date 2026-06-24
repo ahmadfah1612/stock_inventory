@@ -29,12 +29,28 @@ export function MainNav() {
           </Link>
         );
       })}
-      <a
+      <Link
+        href="/import"
+        aria-current={pathname.startsWith("/import") ? "page" : undefined}
+        className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+          pathname.startsWith("/import")
+            ? "bg-indigo-50 text-indigo-700"
+            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+        }`}
+      >
+        Import
+      </Link>
+      <Link
         href="/export"
-        className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        aria-current={pathname.startsWith("/export") ? "page" : undefined}
+        className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+          pathname.startsWith("/export")
+            ? "bg-indigo-50 text-indigo-700"
+            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+        }`}
       >
         Export
-      </a>
+      </Link>
     </nav>
   );
 }
