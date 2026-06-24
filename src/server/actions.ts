@@ -40,8 +40,18 @@ export async function createMaterialAction(formData: FormData) {
   if (!session?.user) redirect("/login");
   const brand = String(formData.get("brand") ?? "").trim();
   const grade = String(formData.get("grade") ?? "").trim();
-  if (!brand || !grade) throw new Error("Brand and grade required");
-  await createMaterial({ brand, grade });
+  if (!brand || !grade) {
+    redirect(`/materials?error=${encodeURIComponent("Brand and grade are required")}`);
+  }
+  try {
+    await createMaterial({ brand, grade });
+  } catch (e) {
+    // 23505 = Postgres unique_violation (duplicate brand+grade)
+    if ((e as { code?: string }).code === "23505") {
+      redirect(`/materials?error=${encodeURIComponent(`${brand} ${grade} already exists`)}`);
+    }
+    throw e;
+  }
   revalidatePath("/materials");
   redirect("/materials");
 }

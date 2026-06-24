@@ -4,11 +4,24 @@ import { MaterialForm } from "@/components/material-form";
 import { formatIDR, formatQty } from "@/lib/money";
 import { Card, PageHeader } from "@/components/ui";
 
-export default async function MaterialsPage() {
-  const rows = await listMaterialsWithBalance();
+export default async function MaterialsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const [rows, { error }] = await Promise.all([listMaterialsWithBalance(), searchParams]);
   return (
     <div>
       <PageHeader title="Materials" subtitle="Manage material grades and open their stock cards" />
+
+      {error && (
+        <p
+          role="alert"
+          className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          {error}
+        </p>
+      )}
 
       <div className="mb-6">
         <MaterialForm />
