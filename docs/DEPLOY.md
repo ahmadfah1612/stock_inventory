@@ -37,3 +37,23 @@ pnpm dev                 # http://localhost:3000
 # Optional demo data:
 pnpm tsx --tsconfig tsconfig.json scripts/seed-demo.ts
 ```
+
+## Importing the legacy Excel workbook
+
+Loads all per-grade tabs (materials + full transaction history) from `Stock PP 2025.xlsx`.
+Balances are recomputed by the weighted-average engine. **This wipes existing materials/transactions.**
+
+```bash
+pip install openpyxl
+python3 scripts/parse-xlsx.py "~/Downloads/Stock PP 2025.xlsx"   # -> scripts/.import-data.json
+pnpm tsx --tsconfig tsconfig.json scripts/import-xlsx.ts
+```
+
+Notes:
+- The parser handles the workbook's quirks: blank-typed opening-buy rows, buys mis-logged
+  in the Penjualan columns, missing/inverted dates (clamped to preserve sheet order),
+  and "Average" consolidation rows.
+- Historical sells carry no selling price (the old workbook only tracked cost), so their
+  Profit shows "—". New sells recorded in-app can include a sale price.
+- Recomputed balances can differ from the old Excel by tiny residuals (the workbook had
+  manual cleanup adjustments); the engine balance is the consistent source of truth.
