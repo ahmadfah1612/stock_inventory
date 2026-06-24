@@ -33,7 +33,6 @@ export function LedgerTable({ rows }: { rows: Row[] }) {
             <th scope="colgroup" className="border-l border-slate-200 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-emerald-700" colSpan={3}>Pembelian</th>
             <th scope="colgroup" className="border-l border-slate-200 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-indigo-700" colSpan={3}>Penjualan</th>
             <th scope="colgroup" className="border-l border-slate-200 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-600" colSpan={3}>Saldo</th>
-            <th scope="col" className="border-l border-slate-200 px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide text-slate-500" rowSpan={2}>Profit</th>
           </tr>
           <tr className="border-b border-slate-200 bg-slate-50">
             {["Unit", "Harga", "Jumlah", "Unit", "Harga", "Jumlah", "Unit", "Harga", "Jumlah"].map(
@@ -53,7 +52,6 @@ export function LedgerTable({ rows }: { rows: Row[] }) {
           {rows.map((r) => {
             const isBuy = r.type === "buy";
             const avg = Number(r.balQty) === 0 ? "0" : String(Number(r.balValue) / Number(r.balQty));
-            const hasProfit = !isBuy && r.revenue !== "0";
             return (
               <tr key={r.id} className="transition-colors hover:bg-slate-50">
                 <td className="whitespace-nowrap px-3 py-2.5 text-slate-700">{formatDate(r.date)}</td>
@@ -72,10 +70,6 @@ export function LedgerTable({ rows }: { rows: Row[] }) {
                 <td className={`${td} border-l border-slate-100`}>{formatQty(r.balQty)}</td>
                 <td className={td}>{formatIDR(avg)}</td>
                 <td className={`${td} font-medium text-slate-900`}>{formatIDR(r.balValue)}</td>
-
-                <td className={`${td} border-l border-slate-100 font-medium ${hasProfit ? (Number(r.profit) >= 0 ? "text-emerald-700" : "text-rose-700") : "text-slate-400"}`}>
-                  {hasProfit ? formatIDR(r.profit) : "—"}
-                </td>
               </tr>
             );
           })}
