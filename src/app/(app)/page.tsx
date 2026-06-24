@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { listMaterialsWithBalance } from "@/server/materials";
+import { monthlyActivity } from "@/server/stats";
+import { ActivityChart } from "@/components/activity-chart";
 import { formatIDR, formatQty } from "@/lib/money";
 import { Card, PageHeader, StatCard, StokKosongBadge } from "@/components/ui";
 import { SearchBox, matchesQuery } from "@/components/search-box";
@@ -24,7 +26,7 @@ export default async function SummaryPage({
   const dir: Dir = parseDir(sp.dir);
   const q = sp.q;
 
-  const rows = await listMaterialsWithBalance();
+  const [rows, activity] = await Promise.all([listMaterialsWithBalance(), monthlyActivity(12)]);
   // KPI cards reflect the whole inventory, not the filtered view
   const totalValue = rows.reduce((a, r) => a + Number(r.balValue), 0);
   const outOfStock = rows.filter((r) => Number(r.balQty) === 0).length;
@@ -41,6 +43,10 @@ export default async function SummaryPage({
         <StatCard label="Total Inventory Value" value={formatIDR(totalValue)} />
         <StatCard label="Grades" value={String(rows.length)} hint="active materials" />
         <StatCard label="Out of Stock" value={String(outOfStock)} hint="grades at zero" />
+      </div>
+
+      <div className="mb-6">
+        <ActivityChart data={activity} />
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2">

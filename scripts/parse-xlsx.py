@@ -25,6 +25,9 @@ def numstr(v):
 
 def datestr(v):
     if isinstance(v, (datetime.datetime, datetime.date)):
+        # reject implausible years (typos like 2922) so they inherit the prior date
+        if v.year < 2005 or v.year > 2100:
+            return None
         return v.strftime("%Y-%m-%d")
     return None
 
