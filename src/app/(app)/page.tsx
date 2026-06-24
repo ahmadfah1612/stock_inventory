@@ -2,11 +2,30 @@ import Link from "next/link";
 import { listMaterialsWithBalance } from "@/server/materials";
 import { formatIDR, formatQty } from "@/lib/money";
 import { Card, PageHeader, StatCard, StokKosongBadge } from "@/components/ui";
+import { ariaSort, arrow, compare, parseDir, sortHref, type Dir } from "@/lib/sort";
 
-export default async function SummaryPage() {
+const COLS = {
+  brand: (r: { brand: string }) => r.brand,
+  grade: (r: { grade: string }) => r.grade,
+  qty: (r: { balQty: string }) => Number(r.balQty),
+  price: (r: { avgCost: string }) => Number(r.avgCost),
+  total: (r: { balValue: string }) => Number(r.balValue),
+} as const;
+type Col = keyof typeof COLS;
+
+export default async function SummaryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string; dir?: string }>;
+}) {
+  const sp = await searchParams;
+  const sort: Col = (sp.sort && sp.sort in COLS ? sp.sort : "brand") as Col;
+  const dir: Dir = parseDir(sp.dir);
+
   const rows = await listMaterialsWithBalance();
   const totalValue = rows.reduce((a, r) => a + Number(r.balValue), 0);
   const outOfStock = rows.filter((r) => Number(r.balQty) === 0).length;
+  const sorted = [...rows].sort((a, b) => compare(COLS[sort](a), COLS[sort](b), dir));
 
   return (
     <div>
@@ -37,15 +56,15 @@ export default async function SummaryPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  <th scope="col" className="px-4 py-3">Stock</th>
-                  <th scope="col" className="px-4 py-3">Grade</th>
-                  <th scope="col" className="px-4 py-3 text-right">Qty (Kg)</th>
-                  <th scope="col" className="px-4 py-3 text-right">Price/Kg</th>
-                  <th scope="col" className="px-4 py-3 text-right">Total</th>
+                  <SortableTh col="brand" label="Stock" sort={sort} dir={dir} />
+                  <SortableTh col="grade" label="Grade" sort={sort} dir={dir} />
+                  <SortableTh col="qty" label="Qty (Kg)" sort={sort} dir={dir} align="right" />
+                  <SortableTh col="price" label="Price/Kg" sort={sort} dir={dir} align="right" />
+                  <SortableTh col="total" label="Total" sort={sort} dir={dir} align="right" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {rows.map((r) => {
+                {sorted.map((r) => {
                   const empty = Number(r.balQty) === 0;
                   return (
                     <tr key={r.id} className="transition-colors hover:bg-slate-50">
@@ -93,5 +112,38 @@ export default async function SummaryPage() {
         )}
       </Card>
     </div>
+  );
+}
+
+function SortableTh({
+  col,
+  label,
+  sort,
+  dir,
+  align = "left",
+}: {
+  col: Col;
+  label: string;
+  sort: Col;
+  dir: Dir;
+  align?: "left" | "right";
+}) {
+  const active = sort === col;
+  return (
+    <th
+      scope="col"
+      aria-sort={ariaSort(active, dir)}
+      className={`px-4 py-3 ${align === "right" ? "text-right" : "text-left"}`}
+    >
+      <Link
+        href={sortHref("/", col, sort, dir)}
+        className={`inline-flex items-center gap-0.5 rounded hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+          active ? "text-slate-900" : ""
+        }`}
+      >
+        {label}
+        <span aria-hidden="true">{arrow(active, dir) || " ↕"}</span>
+      </Link>
+    </th>
   );
 }
