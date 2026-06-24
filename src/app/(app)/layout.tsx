@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
-import { MainNav } from "@/components/main-nav";
+import { Sidebar } from "@/components/sidebar";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -13,46 +13,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .join("")
     .toUpperCase();
 
+  const signOutAction = async () => {
+    "use server";
+    await signOut({ redirectTo: "/login" });
+  };
+
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950">
-      <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-900/90 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <span
-              aria-hidden="true"
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white"
-            >
-              SI
-            </span>
-            <span className="text-sm font-semibold tracking-tight text-slate-100 sm:text-base">
-              Stock Inventory
-            </span>
-          </div>
-
-          <MainNav isAdmin={session.user.role === "admin"} />
-
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/login" });
-            }}
-            className="flex items-center gap-2.5"
-          >
-            <span
-              aria-hidden="true"
-              className="hidden h-8 w-8 items-center justify-center rounded-full bg-slate-700 text-xs font-semibold text-slate-200 sm:flex"
-            >
-              {initials}
-            </span>
-            <span className="hidden text-sm text-slate-300 md:inline">{session.user.name}</span>
-            <button className="cursor-pointer rounded-lg border border-slate-700 px-3 py-1.5 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-              Keluar
-            </button>
-          </form>
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+    <div className="min-h-screen bg-slate-950">
+      <Sidebar
+        isAdmin={session.user.role === "admin"}
+        userName={session.user.name ?? "Staff"}
+        initials={initials}
+        signOutAction={signOutAction}
+      />
+      <div className="lg:pl-64">
+        <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+      </div>
     </div>
   );
 }
