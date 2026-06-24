@@ -5,40 +5,18 @@ import { materials, transactions } from "@/db/schema";
 import { listLedger } from "@/server/transactions";
 import { LedgerTable } from "@/components/ledger-table";
 import { PageHeader, PrimaryLink } from "@/components/ui";
-import { AveragePanel, type SideAvg } from "@/components/average-panel";
+import { AveragePanel, type Saldo } from "@/components/average-panel";
 import type { InferSelectModel } from "drizzle-orm";
 
 type Txn = InferSelectModel<typeof transactions>;
 
-const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
-
-function avgBuy(rows: Txn[]): SideAvg {
-  const buys = rows.filter((r) => r.type === "buy");
-  return {
-    count: buys.length,
-    unit: mean(buys.map((r) => Number(r.qty))),
-    harga: mean(buys.map((r) => Number(r.unitCost ?? 0))),
-    jumlah: mean(buys.map((r) => Number(r.qty) * Number(r.unitCost ?? 0))),
-  };
-}
-
-function avgSell(rows: Txn[]): SideAvg {
-  const sells = rows.filter((r) => r.type !== "buy");
-  return {
-    count: sells.length,
-    unit: mean(sells.map((r) => Number(r.qty))),
-    // per-unit price: actual sale price if recorded, else weighted-average cost (cogs / qty)
-    harga: mean(
-      sells.map((r) =>
-        r.salePrice != null
-          ? Number(r.salePrice)
-          : Number(r.qty) > 0
-            ? Number(r.cogs) / Number(r.qty)
-            : 0,
-      ),
-    ),
-    jumlah: mean(sells.map((r) => (r.revenue !== "0" ? Number(r.revenue) : Number(r.cogs)))),
-  };
+/** Saldo (running balance) at the last transaction within the range. Harga = weighted-avg cost. */
+function saldoAtEnd(rows: Txn[]): Saldo | null {
+  if (rows.length === 0) return null;
+  const last = rows[rows.length - 1];
+  const unit = Number(last.balQty);
+  const jumlah = Number(last.balValue);
+  return { unit, jumlah, harga: unit > 0 ? jumlah / unit : 0, asOf: last.date };
 }
 
 export default async function LedgerPage({
@@ -78,13 +56,7 @@ export default async function LedgerPage({
         subtitle="Stock card · running weighted-average cost"
         action={<PrimaryLink href={`/materials/${id}/new`}>+ Transaksi</PrimaryLink>}
       />
-      <AveragePanel
-        action={`/materials/${id}`}
-        from={from}
-        to={to}
-        buy={avgBuy(inRange)}
-        sell={avgSell(inRange)}
-      />
+      <AveragePanel action={`/materials/${id}`} from={from} to={to} saldo={saldoAtEnd(inRange)} />
       <LedgerTable rows={rows} />
     </div>
   );
