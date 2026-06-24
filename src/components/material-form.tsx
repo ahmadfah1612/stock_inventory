@@ -11,13 +11,13 @@ export function MaterialForm() {
     >
       <div className="flex-1 space-y-1.5">
         <label htmlFor="brand" className="block text-sm font-medium text-slate-700">
-          Stock (brand)
+          Barang
         </label>
         <input id="brand" name="brand" required placeholder="e.g. Exxon" className={inputCls} />
       </div>
       <div className="flex-1 space-y-1.5">
         <label htmlFor="grade" className="block text-sm font-medium text-slate-700">
-          Grade
+          Kode Barang
         </label>
         <input id="grade" name="grade" required placeholder="e.g. AP03B" className={inputCls} />
       </div>

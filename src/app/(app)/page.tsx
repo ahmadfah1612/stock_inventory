@@ -56,8 +56,8 @@ export default async function SummaryPage({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  <SortableTh col="brand" label="Stock" sort={sort} dir={dir} />
-                  <SortableTh col="grade" label="Grade" sort={sort} dir={dir} />
+                  <SortableTh col="brand" label="Barang" sort={sort} dir={dir} />
+                  <SortableTh col="grade" label="Kode Barang" sort={sort} dir={dir} />
                   <SortableTh col="qty" label="Qty (Kg)" sort={sort} dir={dir} align="right" />
                   <SortableTh col="price" label="Price/Kg" sort={sort} dir={dir} align="right" />
                   <SortableTh col="total" label="Total" sort={sort} dir={dir} align="right" />
