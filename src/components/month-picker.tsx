@@ -1,26 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
-const MONTHS = [
-  "Januari",
-  "Februari",
-  "Maret",
-  "April",
-  "Mei",
-  "Juni",
-  "Juli",
-  "Agustus",
-  "September",
-  "Oktober",
-  "November",
-  "Desember",
-];
-
-function labelYm(ym: string): string {
-  const [y, m] = ym.split("-").map(Number);
-  return `${MONTHS[m - 1]} ${y}`;
-}
+import { labelYm } from "@/lib/month";
 
 export function MonthPicker({
   action,
@@ -66,5 +47,3 @@ export function MonthPicker({
     </div>
   );
 }
-
-export { labelYm };
