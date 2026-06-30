@@ -45,6 +45,20 @@ export type MonthlyHppRow = {
   nilaiStok: number;
 };
 
+type RawTxn = {
+  id: string;
+  materialId: string;
+  brand: string;
+  grade: string;
+  date: string;
+  type: string;
+  qty: string;
+  unitCost: string | null;
+  cogs: string;
+  balQty: string;
+  balValue: string;
+};
+
 /** Last calendar day of YYYY-MM as ISO date string. */
 export function monthEnd(ym: string): string {
   const [y, m] = ym.split("-").map(Number);
@@ -59,6 +73,50 @@ export function currentYm(): string {
 
 function avgFromBalance(balQty: string, balValue: string): string {
   return Number(balQty) === 0 ? "0" : String(Number(balValue) / Number(balQty));
+}
+
+function toMutationRow(r: RawTxn): MutationRow {
+  return {
+    id: r.id,
+    date: r.date,
+    type: r.type,
+    qty: r.qty,
+    avgCost: avgFromBalance(r.balQty, r.balValue),
+    cogs: r.cogs,
+    balQty: r.balQty,
+  };
+}
+
+/** Single query: all transactions grouped by material (avoids N+1). */
+async function loadGroupedTxns(): Promise<Map<string, { brand: string; grade: string; rows: RawTxn[] }>> {
+  const rows = await db
+    .select({
+      id: transactions.id,
+      materialId: transactions.materialId,
+      brand: materials.brand,
+      grade: materials.grade,
+      date: transactions.date,
+      type: transactions.type,
+      qty: transactions.qty,
+      unitCost: transactions.unitCost,
+      cogs: transactions.cogs,
+      balQty: transactions.balQty,
+      balValue: transactions.balValue,
+    })
+    .from(transactions)
+    .innerJoin(materials, eq(materials.id, transactions.materialId))
+    .orderBy(asc(materials.brand), asc(materials.grade), asc(transactions.date), asc(transactions.seq));
+
+  const map = new Map<string, { brand: string; grade: string; rows: RawTxn[] }>();
+  for (const r of rows) {
+    let g = map.get(r.materialId);
+    if (!g) {
+      g = { brand: r.brand, grade: r.grade, rows: [] };
+      map.set(r.materialId, g);
+    }
+    g.rows.push(r);
+  }
+  return map;
 }
 
 /** KPI cards for a selected month. */
@@ -98,32 +156,17 @@ export async function monthKpis(ym: string): Promise<MonthKpi> {
 
 /** Per-material mutation rows for a month (Laporan HPP bulanan). */
 export async function monthlyMutations(ym: string): Promise<MaterialMutations[]> {
-  const mats = await db.select().from(materials).orderBy(asc(materials.brand), asc(materials.grade));
+  const grouped = await loadGroupedTxns();
   const result: MaterialMutations[] = [];
 
-  for (const m of mats) {
-    const rows = await db
-      .select()
-      .from(transactions)
-      .where(eq(transactions.materialId, m.id))
-      .orderBy(asc(transactions.date), asc(transactions.seq));
-
-    const inMonth = rows.filter((r) => r.date.startsWith(ym));
+  for (const [id, g] of grouped) {
+    const inMonth = g.rows.filter((r) => r.date.startsWith(ym));
     if (inMonth.length === 0) continue;
-
     result.push({
-      id: m.id,
-      brand: m.brand,
-      grade: m.grade,
-      rows: inMonth.map((r) => ({
-        id: r.id,
-        date: r.date,
-        type: r.type,
-        qty: r.qty,
-        avgCost: avgFromBalance(r.balQty, r.balValue),
-        cogs: r.cogs,
-        balQty: r.balQty,
-      })),
+      id,
+      brand: g.brand,
+      grade: g.grade,
+      rows: inMonth.map(toMutationRow),
     });
   }
   return result;
@@ -131,31 +174,16 @@ export async function monthlyMutations(ym: string): Promise<MaterialMutations[]>
 
 /** Full kartu stok (all transactions) per material. */
 export async function allMutations(): Promise<MaterialMutations[]> {
-  const mats = await db.select().from(materials).orderBy(asc(materials.brand), asc(materials.grade));
+  const grouped = await loadGroupedTxns();
   const result: MaterialMutations[] = [];
 
-  for (const m of mats) {
-    const rows = await db
-      .select()
-      .from(transactions)
-      .where(eq(transactions.materialId, m.id))
-      .orderBy(asc(transactions.date), asc(transactions.seq));
-
-    if (rows.length === 0) continue;
-
+  for (const [id, g] of grouped) {
+    if (g.rows.length === 0) continue;
     result.push({
-      id: m.id,
-      brand: m.brand,
-      grade: m.grade,
-      rows: rows.map((r) => ({
-        id: r.id,
-        date: r.date,
-        type: r.type,
-        qty: r.qty,
-        avgCost: avgFromBalance(r.balQty, r.balValue),
-        cogs: r.cogs,
-        balQty: r.balQty,
-      })),
+      id,
+      brand: g.brand,
+      grade: g.grade,
+      rows: g.rows.map(toMutationRow),
     });
   }
   return result;
@@ -164,18 +192,12 @@ export async function allMutations(): Promise<MaterialMutations[]> {
 /** HPP summary per item at month-end, with monthly flow stats. */
 export async function itemHppSummary(ym: string): Promise<ItemHppSummary[]> {
   const end = monthEnd(ym);
-  const mats = await db.select().from(materials).orderBy(asc(materials.brand), asc(materials.grade));
+  const grouped = await loadGroupedTxns();
   const result: ItemHppSummary[] = [];
 
-  for (const m of mats) {
-    const rows = await db
-      .select()
-      .from(transactions)
-      .where(eq(transactions.materialId, m.id))
-      .orderBy(asc(transactions.date), asc(transactions.seq));
-
-    const atEnd = [...rows].reverse().find((r) => r.date <= end);
-    const inMonth = rows.filter((r) => r.date.startsWith(ym));
+  for (const [id, g] of grouped) {
+    const atEnd = [...g.rows].reverse().find((r) => r.date <= end);
+    const inMonth = g.rows.filter((r) => r.date.startsWith(ym));
 
     const hppKeluarBulan = inMonth
       .filter((r) => r.type !== "buy")
@@ -188,9 +210,9 @@ export async function itemHppSummary(ym: string): Promise<ItemHppSummary[]> {
     const balValue = atEnd?.balValue ?? "0";
 
     result.push({
-      id: m.id,
-      brand: m.brand,
-      grade: m.grade,
+      id,
+      brand: g.brand,
+      grade: g.grade,
       balQty,
       avgCost: avgFromBalance(balQty, balValue),
       balValue,
@@ -198,50 +220,81 @@ export async function itemHppSummary(ym: string): Promise<ItemHppSummary[]> {
       pembelianBulan,
     });
   }
-  return result;
+
+  // Include materials with no transactions yet
+  const mats = await db.select().from(materials).orderBy(asc(materials.brand), asc(materials.grade));
+  for (const m of mats) {
+    if (!grouped.has(m.id)) {
+      result.push({
+        id: m.id,
+        brand: m.brand,
+        grade: m.grade,
+        balQty: "0",
+        avgCost: "0",
+        balValue: "0",
+        hppKeluarBulan: 0,
+        pembelianBulan: 0,
+      });
+    }
+  }
+
+  return result.sort((a, b) => a.brand.localeCompare(b.brand) || a.grade.localeCompare(b.grade));
 }
 
-/** Monthly HPP trend for the last N months. */
+/** Monthly HPP trend for the last N months — single query for flow + stock values. */
 export async function monthlyHppTrend(months = 12): Promise<MonthlyHppRow[]> {
   const res = await db.execute(sql`
-    with months as (
-      select
-        to_char(date, 'YYYY-MM') as ym,
-        coalesce(sum(case when type = 'buy' then qty * unit_cost else 0 end), 0) as pembelian,
-        coalesce(sum(case when type <> 'buy' then cogs else 0 end), 0) as hpp_keluar
+    with recent as (
+      select distinct to_char(date, 'YYYY-MM') as ym
       from transactions
+      order by ym desc
+      limit ${months}
+    ),
+    bounds as (
+      select
+        ym,
+        ((ym || '-01')::date + interval '1 month' - interval '1 day')::date as end_date
+      from recent
+    ),
+    flow as (
+      select
+        to_char(t.date, 'YYYY-MM') as ym,
+        coalesce(sum(case when t.type = 'buy' then t.qty * t.unit_cost else 0 end), 0) as pembelian,
+        coalesce(sum(case when t.type <> 'buy' then t.cogs else 0 end), 0) as hpp_keluar
+      from transactions t
+      inner join bounds b on to_char(t.date, 'YYYY-MM') = b.ym
       group by 1
-    )
-    select ym, pembelian, hpp_keluar
-    from months
-    order by ym desc
-    limit ${months}
-  `);
-  const rows = (res as unknown as { rows: { ym: string; pembelian: string; hpp_keluar: string }[] }).rows;
-
-  const trend: MonthlyHppRow[] = [];
-  for (const r of rows.reverse()) {
-    const end = monthEnd(r.ym);
-    const bal = await db.execute(sql`
-      select coalesce(sum(bal_value::numeric), 0) as v
-      from (
+    ),
+    stock as (
+      select
+        b.ym,
+        coalesce(sum(l.bal_value::numeric), 0) as nilai_stok
+      from bounds b
+      cross join lateral (
         select distinct on (material_id) bal_value
         from transactions
-        where date <= ${end}::date
+        where date <= b.end_date
         order by material_id, date desc, seq desc
-      ) s
-    `);
-    const nilaiStok = Number(
-      (bal as unknown as { rows: { v: string }[] }).rows[0]?.v ?? 0,
-    );
-    trend.push({
-      ym: r.ym,
-      pembelian: Number(r.pembelian),
-      hppKeluar: Number(r.hpp_keluar),
-      nilaiStok,
-    });
-  }
-  return trend;
+      ) l
+      group by b.ym
+    )
+    select b.ym, coalesce(f.pembelian, 0) as pembelian, coalesce(f.hpp_keluar, 0) as hpp_keluar, coalesce(s.nilai_stok, 0) as nilai_stok
+    from bounds b
+    left join flow f on f.ym = b.ym
+    left join stock s on s.ym = b.ym
+    order by b.ym asc
+  `);
+
+  const rows = (res as unknown as {
+    rows: { ym: string; pembelian: string; hpp_keluar: string; nilai_stok: string }[];
+  }).rows;
+
+  return rows.map((r) => ({
+    ym: r.ym,
+    pembelian: Number(r.pembelian),
+    hppKeluar: Number(r.hpp_keluar),
+    nilaiStok: Number(r.nilai_stok),
+  }));
 }
 
 /** Distinct months that have transactions (for month picker). */
