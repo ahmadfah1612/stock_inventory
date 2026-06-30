@@ -9,7 +9,8 @@ import {
   monthlyMutations,
 } from "@/server/hpp-report";
 import { HppMutationTables } from "@/components/hpp-mutation-table";
-import { MonthPicker, labelYm } from "@/components/month-picker";
+import { MonthPicker } from "@/components/month-picker";
+import { labelYm } from "@/lib/month";
 import { Card, PageHeader, StatCard } from "@/components/ui";
 import { formatIDR, formatQty } from "@/lib/money";
 

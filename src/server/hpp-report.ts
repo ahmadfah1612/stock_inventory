@@ -2,6 +2,7 @@ import "server-only";
 import { asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { materials, transactions } from "@/db/schema";
+import { currentYm, monthEnd, toDateStr, toYm } from "@/lib/month";
 
 export type MonthKpi = {
   totalHpp: number;
@@ -59,17 +60,7 @@ type RawTxn = {
   balValue: string;
 };
 
-/** Last calendar day of YYYY-MM as ISO date string. */
-export function monthEnd(ym: string): string {
-  const [y, m] = ym.split("-").map(Number);
-  const last = new Date(y, m, 0).getDate();
-  return `${ym}-${String(last).padStart(2, "0")}`;
-}
-
-export function currentYm(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
+export { currentYm, monthEnd };
 
 function avgFromBalance(balQty: string, balValue: string): string {
   return Number(balQty) === 0 ? "0" : String(Number(balValue) / Number(balQty));
@@ -85,6 +76,12 @@ function toMutationRow(r: RawTxn): MutationRow {
     cogs: r.cogs,
     balQty: r.balQty,
   };
+}
+
+function normalizeTxn(
+  r: Omit<RawTxn, "date"> & { date: string | Date },
+): RawTxn {
+  return { ...r, date: toDateStr(r.date) };
 }
 
 /** Single query: all transactions grouped by material (avoids N+1). */
@@ -108,7 +105,8 @@ async function loadGroupedTxns(): Promise<Map<string, { brand: string; grade: st
     .orderBy(asc(materials.brand), asc(materials.grade), asc(transactions.date), asc(transactions.seq));
 
   const map = new Map<string, { brand: string; grade: string; rows: RawTxn[] }>();
-  for (const r of rows) {
+  for (const row of rows) {
+    const r = normalizeTxn(row);
     let g = map.get(r.materialId);
     if (!g) {
       g = { brand: r.brand, grade: r.grade, rows: [] };
@@ -160,7 +158,7 @@ export async function monthlyMutations(ym: string): Promise<MaterialMutations[]>
   const result: MaterialMutations[] = [];
 
   for (const [id, g] of grouped) {
-    const inMonth = g.rows.filter((r) => r.date.startsWith(ym));
+    const inMonth = g.rows.filter((r) => toYm(r.date) === ym);
     if (inMonth.length === 0) continue;
     result.push({
       id,
@@ -197,7 +195,7 @@ export async function itemHppSummary(ym: string): Promise<ItemHppSummary[]> {
 
   for (const [id, g] of grouped) {
     const atEnd = [...g.rows].reverse().find((r) => r.date <= end);
-    const inMonth = g.rows.filter((r) => r.date.startsWith(ym));
+    const inMonth = g.rows.filter((r) => toYm(r.date) === ym);
 
     const hppKeluarBulan = inMonth
       .filter((r) => r.type !== "buy")
@@ -221,7 +219,6 @@ export async function itemHppSummary(ym: string): Promise<ItemHppSummary[]> {
     });
   }
 
-  // Include materials with no transactions yet
   const mats = await db.select().from(materials).orderBy(asc(materials.brand), asc(materials.grade));
   for (const m of mats) {
     if (!grouped.has(m.id)) {
@@ -241,68 +238,46 @@ export async function itemHppSummary(ym: string): Promise<ItemHppSummary[]> {
   return result.sort((a, b) => a.brand.localeCompare(b.brand) || a.grade.localeCompare(b.grade));
 }
 
-/** Monthly HPP trend for the last N months — single query for flow + stock values. */
+/** Monthly HPP trend — uses the same GROUP BY pattern as stats.monthlyActivity. */
 export async function monthlyHppTrend(months = 12): Promise<MonthlyHppRow[]> {
   const res = await db.execute(sql`
-    with recent as (
-      select distinct to_char(date, 'YYYY-MM') as ym
-      from transactions
-      order by ym desc
-      limit ${months}
-    ),
-    bounds as (
-      select
-        ym,
-        ((ym || '-01')::date + interval '1 month' - interval '1 day')::date as end_date
-      from recent
-    ),
-    flow as (
-      select
-        to_char(t.date, 'YYYY-MM') as ym,
-        coalesce(sum(case when t.type = 'buy' then t.qty * t.unit_cost else 0 end), 0) as pembelian,
-        coalesce(sum(case when t.type <> 'buy' then t.cogs else 0 end), 0) as hpp_keluar
-      from transactions t
-      inner join bounds b on to_char(t.date, 'YYYY-MM') = b.ym
-      group by 1
-    ),
-    stock as (
-      select
-        b.ym,
-        coalesce(sum(l.bal_value::numeric), 0) as nilai_stok
-      from bounds b
-      cross join lateral (
-        select distinct on (material_id) bal_value
-        from transactions
-        where date <= b.end_date
-        order by material_id, date desc, seq desc
-      ) l
-      group by b.ym
-    )
-    select b.ym, coalesce(f.pembelian, 0) as pembelian, coalesce(f.hpp_keluar, 0) as hpp_keluar, coalesce(s.nilai_stok, 0) as nilai_stok
-    from bounds b
-    left join flow f on f.ym = b.ym
-    left join stock s on s.ym = b.ym
-    order by b.ym asc
+    select
+      to_char(date, 'YYYY-MM') as ym,
+      coalesce(sum(case when type = 'buy' then qty * unit_cost else 0 end), 0) as pembelian,
+      coalesce(sum(case when type <> 'buy' then cogs else 0 end), 0) as hpp_keluar
+    from transactions
+    group by 1
+    order by 1 desc
+    limit ${months}
   `);
 
   const rows = (res as unknown as {
-    rows: { ym: string; pembelian: string; hpp_keluar: string; nilai_stok: string }[];
+    rows: { ym: string; pembelian: string; hpp_keluar: string }[];
   }).rows;
 
-  return rows.map((r) => ({
-    ym: r.ym,
-    pembelian: Number(r.pembelian),
-    hppKeluar: Number(r.hpp_keluar),
-    nilaiStok: Number(r.nilai_stok),
-  }));
+  const ordered = [...rows].reverse();
+  const trend: MonthlyHppRow[] = [];
+
+  for (const r of ordered) {
+    const { nilaiStokAkhir } = await monthKpis(r.ym);
+    trend.push({
+      ym: r.ym,
+      pembelian: Number(r.pembelian),
+      hppKeluar: Number(r.hpp_keluar),
+      nilaiStok: nilaiStokAkhir,
+    });
+  }
+
+  return trend;
 }
 
 /** Distinct months that have transactions (for month picker). */
 export async function availableMonths(): Promise<string[]> {
   const res = await db.execute(sql`
-    select distinct to_char(date, 'YYYY-MM') as ym
+    select to_char(date, 'YYYY-MM') as ym
     from transactions
-    order by ym desc
+    group by 1
+    order by 1 desc
   `);
   const rows = (res as unknown as { rows: { ym: string }[] }).rows.map((r) => r.ym);
   const cur = currentYm();
