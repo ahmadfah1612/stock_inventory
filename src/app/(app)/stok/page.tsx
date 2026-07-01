@@ -138,6 +138,10 @@ async function BulananTab({ month }: { month: string }) {
 
   return (
     <div className="space-y-6">
+      <p className="text-sm text-slate-400">
+        Laporan mutasi untuk{" "}
+        <span className="font-medium text-slate-200">{labelYm(month)}</span>
+      </p>
       {trend.length > 0 && (
         <Card>
           <div className="border-b border-slate-800 px-4 py-3">

@@ -98,3 +98,8 @@ body {
   outline: 2px solid #4f46e5;
   outline-offset: 1px;
 }
+/* month-only picker: hide day grid, keep month/year dropdowns */
+.rdp-month-picker-only .rdp-weekdays,
+.rdp-month-picker-only .rdp-weeks {
+  display: none;
+}
