@@ -10,7 +10,9 @@ import {
 } from "@/server/hpp-report";
 import { HppMutationTables } from "@/components/hpp-mutation-table";
 import { MonthPicker } from "@/components/month-picker";
+import { Pagination } from "@/components/pagination";
 import { labelYm } from "@/lib/month";
+import { KARTU_PAGE_SIZE, paginate, parsePage } from "@/lib/pagination";
 import { Card, PageHeader, StatCard } from "@/components/ui";
 import { formatIDR, formatQty } from "@/lib/money";
 
@@ -21,19 +23,22 @@ type Tab = "kartu" | "bulanan" | "item";
 export default async function StokPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; month?: string }>;
+  searchParams: Promise<{ tab?: string; month?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const tab: Tab =
     sp.tab === "kartu" ? "kartu" : sp.tab === "item" ? "item" : "bulanan";
+  const page = parsePage(sp.page);
 
   const months = await availableMonths();
   const month = sp.month && months.includes(sp.month) ? sp.month : months[0] ?? currentYm();
 
-  const href = (next: { tab?: Tab; month?: string }) => {
+  const href = (next: { tab?: Tab; month?: string; page?: number }) => {
     const p = new URLSearchParams();
     p.set("tab", next.tab ?? tab);
     p.set("month", next.month ?? month);
+    const nextPage = next.page ?? 1;
+    if (nextPage > 1) p.set("page", String(nextPage));
     return `/stok?${p.toString()}`;
   };
 
@@ -74,7 +79,9 @@ export default async function StokPage({
         />
       </div>
 
-      {tab === "kartu" && <KartuTab />}
+      {tab === "kartu" && (
+        <KartuTab page={page} hrefForPage={(p) => href({ tab: "kartu", page: p })} />
+      )}
       {tab === "bulanan" && <BulananTab month={month} />}
       {tab === "item" && <ItemTab month={month} />}
     </div>
@@ -97,9 +104,33 @@ function PillTab({ label, active, href }: { label: string; active: boolean; href
   );
 }
 
-async function KartuTab() {
+async function KartuTab({
+  page,
+  hrefForPage,
+}: {
+  page: number;
+  hrefForPage: (page: number) => string;
+}) {
   const groups = await allMutations();
-  return <HppMutationTables groups={groups} />;
+  const paged = paginate(groups, page, KARTU_PAGE_SIZE);
+
+  return (
+    <div className="space-y-4">
+      <HppMutationTables groups={paged.items} />
+      {paged.totalPages > 1 && (
+        <Card>
+          <Pagination
+            page={paged.page}
+            totalPages={paged.totalPages}
+            total={paged.total}
+            rangeStart={paged.rangeStart}
+            rangeEnd={paged.rangeEnd}
+            hrefForPage={hrefForPage}
+          />
+        </Card>
+      )}
+    </div>
+  );
 }
 
 async function BulananTab({ month }: { month: string }) {
