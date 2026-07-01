@@ -1,6 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { materials, transactions } from "@/db/schema";
+import { materials, transactions, users } from "@/db/schema";
 import { computeLedger, type TxnInput } from "@/lib/valuation";
 
 type Seed = {
@@ -46,6 +46,9 @@ const data: Seed[] = [
 ];
 
 async function main() {
+  const [seedUser] = await db.select({ id: users.id }).from(users).limit(1);
+  if (!seedUser) throw new Error("No users found — run seed-user first.");
+
   for (const s of data) {
     const [m] = await db
       .insert(materials)
@@ -61,6 +64,7 @@ async function main() {
         salePrice: t.salePrice ?? null,
         docNo: t.docNo ?? null,
         counterparty: t.counterparty ?? null,
+        createdBy: seedUser.id,
       });
     }
     // recompute snapshots (same logic as applyLedger)

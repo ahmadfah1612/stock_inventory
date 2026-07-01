@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { materials, transactions } from "@/db/schema";
+import { materials, transactions, users } from "@/db/schema";
 import { computeLedger, type TxnInput } from "@/lib/valuation";
 
 type Txn = {
@@ -20,6 +20,8 @@ const JSON_PATH =
 
 async function main() {
   const data: Material[] = JSON.parse(readFileSync(JSON_PATH, "utf8"));
+  const [seedUser] = await db.select({ id: users.id }).from(users).limit(1);
+  if (!seedUser) throw new Error("No users found — run seed-user first.");
 
   // wipe existing (demo) data
   await db.delete(transactions);
@@ -46,6 +48,7 @@ async function main() {
             salePrice: t.salePrice,
             docNo: t.docNo,
             counterparty: t.counterparty,
+            createdBy: seedUser.id,
           });
         }
         const rows = await tx

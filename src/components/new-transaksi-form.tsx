@@ -45,6 +45,8 @@ export function NewTransaksiForm({ materials, error }: { materials: PickItem[]; 
         </p>
       )}
 
+      <input type="hidden" name="returnTo" value="/transaksi" />
+
       {/* Step 1: pick barang + kode barang */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="space-y-1.5">
