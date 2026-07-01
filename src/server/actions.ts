@@ -58,7 +58,12 @@ export async function createTransactionAction(formData: FormData) {
   }
   revalidatePath(`/materials/${parsed.materialId}`);
   revalidatePath("/");
-  redirect(returnTo === "/transaksi" ? "/transaksi" : `/materials/${parsed.materialId}`);
+  const ok = encodeURIComponent("Transaksi berhasil disimpan.");
+  redirect(
+    returnTo === "/transaksi"
+      ? `/transaksi?ok=${ok}`
+      : `/materials/${parsed.materialId}?ok=${ok}`,
+  );
 }
 
 export async function createMaterialAction(formData: FormData) {

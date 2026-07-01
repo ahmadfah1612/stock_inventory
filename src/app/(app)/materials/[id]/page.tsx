@@ -6,6 +6,7 @@ import { listLedger } from "@/server/transactions";
 import { auth } from "@/lib/auth";
 import { LedgerTable } from "@/components/ledger-table";
 import { PageHeader, PrimaryLink, StatCard } from "@/components/ui";
+import { SuccessDialog } from "@/components/success-dialog";
 import { formatIDR, formatQty } from "@/lib/money";
 import { AveragePanel, type Saldo } from "@/components/average-panel";
 import { DeleteBarangButton } from "@/components/delete-barang-button";
@@ -52,6 +53,7 @@ export default async function LedgerPage({
   const latestHpp = latestQty > 0 ? latestValue / latestQty : 0;
   return (
     <div>
+      <SuccessDialog message={ok} dismissHref={`/materials/${id}`} />
       <div className="mb-4">
         <Link
           href="/materials"
@@ -71,11 +73,6 @@ export default async function LedgerPage({
         }
       />
 
-      {ok && (
-        <p role="status" className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-3 py-2 text-sm text-emerald-300">
-          {ok}
-        </p>
-      )}
       {error && (
         <p role="alert" className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
           {error}

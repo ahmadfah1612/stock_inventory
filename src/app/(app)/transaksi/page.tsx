@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { listMaterialsWithBalance } from "@/server/materials";
 import { NewTransaksiForm } from "@/components/new-transaksi-form";
+import { SuccessDialog } from "@/components/success-dialog";
 import { PageHeader } from "@/components/ui";
 
 export default async function TransaksiPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, ok } = await searchParams;
   const rows = await listMaterialsWithBalance();
   const materials = rows.map((r) => ({ id: r.id, brand: r.brand, grade: r.grade, balQty: r.balQty }));
 
   return (
     <div>
+      <SuccessDialog message={ok} dismissHref="/transaksi" />
       <PageHeader
         title="Transaksi Baru"
         subtitle="Pilih barang dan kode barang, lalu catat buy, sell, sample, atau scrap."
