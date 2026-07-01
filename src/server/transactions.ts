@@ -25,7 +25,7 @@ export interface AddTxnInput {
   docNo?: string;
   counterparty?: string;
   note?: string;
-  createdBy?: string;
+  createdBy: string;
 }
 
 export async function listLedger(materialId: string) {
@@ -52,7 +52,7 @@ export async function addTransaction(input: AddTxnInput) {
       materialId: input.materialId, date: input.date, type: input.type, qty: input.qty,
       unitCost: input.unitCost ?? null, salePrice: input.salePrice ?? null,
       docNo: input.docNo ?? null, counterparty: input.counterparty ?? null,
-      note: input.note ?? null, createdBy: input.createdBy ?? null,
+      note: input.note ?? null, createdBy: input.createdBy,
     });
     const rows = await tx.select().from(transactions)
       .where(eq(transactions.materialId, input.materialId))

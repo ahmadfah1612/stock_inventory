@@ -49,6 +49,6 @@ export const transactions = pgTable("transactions", {
   balQty: numeric("bal_qty").notNull().default("0"),
   balValue: numeric("bal_value").notNull().default("0"),
   note: text("note"),
-  createdBy: uuid("created_by").references(() => users.id),
+  createdBy: uuid("created_by").notNull().references(() => users.id),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });

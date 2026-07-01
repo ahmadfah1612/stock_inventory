@@ -14,7 +14,22 @@ async function requireAdmin(): Promise<{ id: string }> {
   const session = await auth();
   if (!session?.user) redirect("/login");
   if (session.user.role !== "admin") redirect("/");
-  return { id: session.user.id };
+  const id = session.user.id;
+  if (!id) redirect("/login?error=" + encodeURIComponent("Sesi kedaluwarsa, silakan masuk lagi."));
+  return { id };
+}
+
+async function requireUserId(): Promise<string> {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const id = session.user.id;
+  if (!id) redirect("/login?error=" + encodeURIComponent("Sesi kedaluwarsa, silakan masuk lagi."));
+  return id;
+}
+
+function txnErrorPath(materialId: string, returnTo?: string) {
+  if (returnTo === "/transaksi") return `/transaksi?error=`;
+  return `/materials/${materialId}/new?error=`;
 }
 
 const schema = z.object({
@@ -30,25 +45,24 @@ const schema = z.object({
 });
 
 export async function createTransactionAction(formData: FormData) {
-  const session = await auth();
-  if (!session?.user) redirect("/login");
+  const userId = await requireUserId();
   const parsed = schema.parse(Object.fromEntries(formData));
+  const returnTo = String(formData.get("returnTo") ?? "").trim() || undefined;
   if (parsed.type === "buy" && !parsed.unitCost) {
     throw new Error("Buy requires unit cost");
   }
   try {
-    await addTransaction({ ...parsed, createdBy: session.user.id });
+    await addTransaction({ ...parsed, createdBy: userId });
   } catch (e) {
-    redirect(`/materials/${parsed.materialId}/new?error=${encodeURIComponent((e as Error).message)}`);
+    redirect(`${txnErrorPath(parsed.materialId, returnTo)}${encodeURIComponent((e as Error).message)}`);
   }
   revalidatePath(`/materials/${parsed.materialId}`);
   revalidatePath("/");
-  redirect(`/materials/${parsed.materialId}`);
+  redirect(returnTo === "/transaksi" ? "/transaksi" : `/materials/${parsed.materialId}`);
 }
 
 export async function createMaterialAction(formData: FormData) {
-  const session = await auth();
-  if (!session?.user) redirect("/login");
+  await requireUserId();
   const brand = String(formData.get("brand") ?? "").trim();
   const grade = String(formData.get("grade") ?? "").trim();
   if (!brand || !grade) {
@@ -156,8 +170,7 @@ export async function updateLowStockThresholdAction(formData: FormData) {
 }
 
 export async function importBarangAction(formData: FormData) {
-  const session = await auth();
-  if (!session?.user) redirect("/login");
+  const userId = await requireUserId();
 
   const brand = String(formData.get("brand") ?? "").trim();
   const grade = String(formData.get("grade") ?? "").trim();
@@ -173,7 +186,7 @@ export async function importBarangAction(formData: FormData) {
   let materialId: string;
   try {
     const buf = await f.arrayBuffer();
-    materialId = await importBarangFromExcel(buf, brand, grade, session.user.id);
+    materialId = await importBarangFromExcel(buf, brand, grade, userId);
   } catch (e) {
     if (e instanceof ImportError) back(e.message);
     throw e;

@@ -117,7 +117,7 @@ export async function importBarangFromExcel(
   buffer: ArrayBuffer,
   brand: string,
   grade: string,
-  createdBy?: string,
+  createdBy: string,
 ): Promise<string> {
   brand = brand.trim();
   grade = grade.trim();
@@ -160,7 +160,7 @@ export async function importBarangFromExcel(
         unitCost: inputs[i].unitCost ?? null,
         docNo: meta[i].docNo,
         counterparty: meta[i].counterparty,
-        createdBy: createdBy ?? null,
+        createdBy,
       });
     }
     const rows = await tx
